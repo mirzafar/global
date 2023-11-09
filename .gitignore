@@ -25,7 +25,7 @@ var/
 *.egg
 .idea
 Pipfile.lock
-settings.py
+server/settings.py
 .DS_Store
 
 *.png
