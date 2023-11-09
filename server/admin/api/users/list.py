@@ -8,8 +8,6 @@ class UsersView(BaseAPIView):
     template_name = 'admin/users.html'
 
     async def get(self, request, user):
-        self.user = user
-        context = dict()
         page = request.args.get('page', 1)
         limit = request.args.get('limit', 50)
 
@@ -38,7 +36,7 @@ class UsersView(BaseAPIView):
             '''
         ) or 0
 
-        context['data'] = {
+        self.context['data'] = {
             'users': users,
             'total': total,
             'page': page,
@@ -47,4 +45,4 @@ class UsersView(BaseAPIView):
             'prev_page': pager.prev_page(),
         }
 
-        return self.render_template(request=request, **context)
+        return self.render_template(request=request, user=user)

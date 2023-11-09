@@ -1,7 +1,6 @@
 from jinja2 import Environment, select_autoescape, FileSystemLoader
 from sanic.request import Request
-from sanic.response import HTTPResponse
-from sanic.response import html
+from sanic.response import HTTPResponse, html
 from sanic.views import HTTPMethodView
 
 from core.auth import auth
@@ -17,17 +16,17 @@ env = Environment(
 
 
 class TemplateHTTPView(HTTPMethodView):
-    template_name = None
-    user = None
+    template_name: str = None
+    context: dict = {}
 
-    def render_template(self, request: Request, **kwargs) -> html:
+    def render_template(self, request: Request, user: dict) -> html:
         template = env.get_template(self.template_name)
         rendered = template.render(
             request=request,
             app=request.app,
             url_for=request.app.url_for,
-            _user=self.user,
-            **kwargs
+            _user=user,
+            **self.context
         )
         return HTTPResponse(rendered, content_type='text/html')
 

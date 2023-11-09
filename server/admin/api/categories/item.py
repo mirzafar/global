@@ -10,9 +10,10 @@ class CategoriesItemView(BaseAPIView):
     template_name = 'admin/categories_item.html'
 
     async def get(self, request, user, category_id):
-        self.user = user
-
-        return self.render_template(request=request)
+        return self.render_template(
+            request=request,
+            user=user
+        )
 
     async def post(self, request, user, category_id):
         title = StrUtils.to_str(request.json.get('title'))

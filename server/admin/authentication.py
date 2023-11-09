@@ -17,7 +17,7 @@ class LoginAdminView(TemplateHTTPView):
 
     async def get(self, request):
         await auth.logout_user(request)
-        return self.render_template(request=request)
+        return self.render_template(request=request, user={})
 
     async def post(self, request):
         username = StrUtils.to_str(request.json.get('username'))

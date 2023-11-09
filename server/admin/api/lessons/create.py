@@ -7,9 +7,6 @@ class LessonsCreateView(BaseAPIView):
     template_name = 'admin/lessons-create.html'
 
     async def get(self, request, user):
-        self.user = user
-        context = dict()
-
         categories = ListUtils.to_list_of_dicts(await db.fetch(
             '''
             SELECT *
@@ -18,8 +15,11 @@ class LessonsCreateView(BaseAPIView):
             '''
         ))
 
-        context['data'] = {
+        self.context['data'] = {
             'categories': categories
         }
 
-        return self.render_template(request=request, **context)
+        return self.render_template(
+            request=request,
+            user=user
+        )

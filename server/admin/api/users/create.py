@@ -11,9 +11,6 @@ class UsersCreateView(BaseAPIView):
     template_name = 'admin/users-create.html'
 
     async def get(self, request, user):
-        self.user = user
-        context = dict()
-
         roles = ListUtils.to_list_of_dicts(await db.fetch(
             '''
             SELECT *
@@ -22,8 +19,8 @@ class UsersCreateView(BaseAPIView):
             '''
         ))
 
-        context['data'] = {
+        self.context['data'] = {
             'roles': roles
         }
 
-        return self.render_template(request=request, **context)
+        return self.render_template(request=request, user=user)

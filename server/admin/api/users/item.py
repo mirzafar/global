@@ -14,16 +14,12 @@ class UsersItemView(BaseAPIView):
     template_name = 'admin/users-item.html'
 
     async def get(self, request, user, user_id):
-        self.user = user
-
         user_id = IntUtils.to_int(user_id)
         if not user_id:
             return response.json({
                 '_success': False,
                 'message': 'Required param(s): user_id'
             })
-
-        context = dict()
 
         customer = await db.fetchrow(
             '''
@@ -50,13 +46,13 @@ class UsersItemView(BaseAPIView):
             '''
         ))
 
-        context['data'] = {
+        self.context['data'] = {
             'user': dict(customer or {}),
             'roles': roles,
             'permissions': permissions,
         }
 
-        return self.render_template(request=request, **context)
+        return self.render_template(request=request, user=user)
 
     async def post(self, request, user, user_id):
         first_name = StrUtils.to_str(request.json.get('first_name'))

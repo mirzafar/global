@@ -11,9 +11,6 @@ class LessonsItemView(BaseAPIView):
     template_name = 'admin/lessons-item.html'
 
     async def get(self, request, user, lesson_id):
-        self.user = user
-        context = dict()
-
         lesson_id = IntUtils.to_int(lesson_id)
         if not lesson_id:
             return response.json({
@@ -38,12 +35,15 @@ class LessonsItemView(BaseAPIView):
             '''
         ))
 
-        context['data'] = {
+        self.context['data'] = {
             'lesson': dict(lesson or {}),
             'categories': categories
         }
 
-        return self.render_template(request=request, **context)
+        return self.render_template(
+            request=request,
+            user=user
+        )
 
     async def post(self, request, user, lesson_id):
         title = StrUtils.to_str(request.json.get('title'))

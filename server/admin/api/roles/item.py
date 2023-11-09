@@ -10,10 +10,7 @@ class RolesItemView(BaseAPIView):
     template_name = 'adminn/category_item.html'
 
     async def get(self, request, user, category_id):
-        self.user = user
-        context = dict()
-
-        context['data'] = dict(await db.fetchrow(
+        self.context['data'] = dict(await db.fetchrow(
             '''
             SELECT *
             FROM public.categories
@@ -22,7 +19,10 @@ class RolesItemView(BaseAPIView):
             category_id
         ) or {})
 
-        return self.render_template(request=request, **context)
+        return self.render_template(
+            request=request,
+            user=user
+        )
 
     async def post(self, request, user, role_id):
         title = StrUtils.to_str(request.json.get('title'))
