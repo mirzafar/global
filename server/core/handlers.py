@@ -19,13 +19,13 @@ class TemplateHTTPView(HTTPMethodView):
     template_name: str = None
     context: dict = {}
 
-    def render_template(self, request: Request, user: dict) -> html:
+    def render_template(self, request: Request, user: dict = None) -> html:
         template = env.get_template(self.template_name)
         rendered = template.render(
             request=request,
             app=request.app,
             url_for=request.app.url_for,
-            _user=user,
+            _user=user or {},
             **self.context
         )
         return HTTPResponse(rendered, content_type='text/html')
