@@ -8,12 +8,9 @@ class UsersView(BaseAPIView):
     template_name = 'admin/users.html'
 
     async def get(self, request, user):
-        page = request.args.get('page', 1)
-        limit = request.args.get('limit', 50)
-
         pager = Pager()
-        pager.set_page(page)
-        pager.set_limit(limit)
+        pager.set_page(request.args.get('page', 1))
+        pager.set_limit(request.args.get('limit', 20))
 
         users = ListUtils.to_list_of_dicts(await db.fetch(
             '''
@@ -28,7 +25,7 @@ class UsersView(BaseAPIView):
             ''' % pager.as_query()
         ))
 
-        total = await db.fetchval(
+        pager.total = await db.fetchval(
             '''
             SELECT count(*)
             FROM public.users u
@@ -38,11 +35,7 @@ class UsersView(BaseAPIView):
 
         self.context['data'] = {
             'users': users,
-            'total': total,
-            'page': page,
-            'limit': limit,
-            'next_page': pager.next_page(total),
-            'prev_page': pager.prev_page(),
+            'pager': pager.dict(),
         }
 
         return self.render_template(request=request, user=user)

@@ -1,12 +1,10 @@
 from functools import partial, wraps
 from inspect import isawaitable
 
-import ujson
 from sanic import response
 
 __all__ = ['auth']
 
-from core.cache import cache
 from core.db import db
 
 
@@ -28,14 +26,11 @@ class Auth:
     def get_auth_key(cls, user_id) -> str:
         return f'auth:user:{user_id}'
 
-    async def login_user(self, request, user):
+    def login_user(self, request, user):
         self.get_session(request)['user_id'] = user['id']
 
-    async def logout_user(self, request):
-        user_id = self.get_session(request).pop('user_id', None)
-        if user_id:
-            await cache.delete(self.get_auth_key(user_id))
-        return user_id
+    def logout_user(self, request):
+        return self.get_session(request).pop('user_id', None)
 
     async def current_user(self, request):
         user_id = self.get_session(request).get('user_id', None)
@@ -61,11 +56,6 @@ class Auth:
                 user_id
             )
             return user
-
-        if request.args.get('user_id') and request.args.get('token'):
-            user = await cache.get(self.get_auth_key(request.args.get('user_id')))
-            if user:
-                return ujson.loads(user)
 
     def login_required(
         self,

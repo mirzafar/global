@@ -56,19 +56,19 @@
                                                 <ul class="pagination pagination-sm">
                                                     <li class="page-item page-indicator">
                                                         <a class="page-link"
-                                                           {% if data.page !=data.prev_page %}
-                                                           href="/api/users/?limit={{data.limit}}&page={{data.prev_page}}"
+                                                           {% if data.pager.prev_page %}
+                                                           href="/api/users/?limit={{data.pager.limit}}&page={{data.pager.prev_page}}"
                                                            {% endif %}
                                                         >
                                                             <i class="fa-solid fa-angle-left"></i></a>
 
                                                     </li>
-                                                    <li class="page-item "><a class="page-link">{{data.page}}</a>
+                                                    <li class="page-item "><a class="page-link">{{data.pager.page}}</a>
                                                     </li>
                                                     <li class="page-item page-indicator">
                                                         <a class="page-link"
-                                                           {% if data.page !=data.next_page %}
-                                                           href="/api/users/?limit={{data.limit}}&page={{data.next_page}}"
+                                                           {% if data.pager.next_page %}
+                                                           href="/api/users/?limit={{data.pager.limit}}&page={{data.pager.next_page}}"
                                                            {% endif %}
                                                         ><i class="fa-solid fa-angle-right"></i></a></li>
                                                 </ul>

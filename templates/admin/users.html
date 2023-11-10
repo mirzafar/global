@@ -2,7 +2,7 @@
 {% block container %}
 <div class="row">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="heading mb-0">Users</h4>
+        <h4 class="heading mb-0">Пользователи</h4>
         <div class="d-flex align-items-center">
             <a href="/api/users/create/" class="btn btn-primary btn-sm ms-2">+ Add User</a>
         </div>
@@ -75,19 +75,19 @@
                                                 <ul class="pagination pagination-sm">
                                                     <li class="page-item page-indicator">
                                                         <a class="page-link"
-                                                           {% if data.page !=data.prev_page %}
-                                                           href="/api/users/?limit={{data.limit}}&page={{data.prev_page}}"
+                                                           {% if data.pager.prev_page %}
+                                                           href="/api/users/?limit={{data.pager.limit}}&page={{data.pager.prev_page}}"
                                                            {% endif %}
                                                         >
                                                             <i class="fa-solid fa-angle-left"></i></a>
 
                                                     </li>
-                                                    <li class="page-item "><a class="page-link">{{data.page}}</a>
+                                                    <li class="page-item "><a class="page-link">{{data.pager.page}}</a>
                                                     </li>
                                                     <li class="page-item page-indicator">
                                                         <a class="page-link"
-                                                           {% if data.page !=data.next_page %}
-                                                           href="/api/users/?limit={{data.limit}}&page={{data.next_page}}"
+                                                           {% if data.pager.next_page %}
+                                                           href="/api/users/?limit={{data.pager.limit}}&page={{data.pager.next_page}}"
                                                            {% endif %}
                                                         ><i class="fa-solid fa-angle-right"></i></a></li>
                                                 </ul>

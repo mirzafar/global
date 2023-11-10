@@ -9,6 +9,7 @@ class Pager:
 
     page = DEFAULT_PAGE
     limit = DEFAULT_LIMIT
+    total = 0
 
     _offset = None
     _query = None
@@ -37,6 +38,10 @@ class Pager:
 
     def reset_offset(self) -> 'Pager':
         self._offset = None
+        return self
+
+    def set_total(self, total) -> 'Pager':
+        self.total = total or 0
         return self
 
     def set_limit(self, limit, default=DEFAULT_LIMIT, minimum=1, maximum=1000) -> 'Pager':
@@ -86,12 +91,28 @@ class Pager:
             return {
                 'page': self.page,
                 'offset': self.offset,
-                'limit': self.limit
+                'limit': self.limit,
+                'total': self.total,
+                'from_item_count': self.from_item_count(self.page, self.limit),
+                'to_item_count': self.to_item_count(self.page, self.limit, self.total),
+                'next_page': self.next_page(self.page, self.limit, self.total),
+                'prev_page': self.prev_page(self.page),
             }
         return {}
 
-    def next_page(self, total) -> int:
-        return self.page + 1 if (self.page * self.limit) < total else self.page
+    @classmethod
+    def next_page(cls, page, limit, total) -> int:
+        return page + 1 if page * limit < total else None
 
-    def prev_page(self) -> int:
-        return self.page - 1 if self.page > 1 else self.page
+    @classmethod
+    def prev_page(cls, page) -> int:
+        return page - 1 if page > 1 else None
+
+    @classmethod
+    def to_item_count(cls, limit, page, total) -> int:
+        count = limit * page
+        return count if count <= total else total
+
+    @classmethod
+    def from_item_count(cls, page, limit) -> int:
+        return (page - 1) * limit + 1

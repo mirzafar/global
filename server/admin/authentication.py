@@ -16,7 +16,7 @@ class LoginAdminView(TemplateHTTPView):
     template_name = 'auth/admin/login.html'
 
     async def get(self, request):
-        await auth.logout_user(request)
+        auth.logout_user(request)
         return self.render_template(request=request, user={})
 
     async def post(self, request):
@@ -65,7 +65,7 @@ class LoginAdminView(TemplateHTTPView):
                 'message': 'You do not have access'
             })
 
-        await auth.login_user(request, user)
+        auth.login_user(request, user)
         return response.json({
             '_success': True,
             'url': '/api/'

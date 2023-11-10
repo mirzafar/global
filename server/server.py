@@ -2,7 +2,7 @@ import asyncio
 import os
 
 from sanic import Sanic
-from sanic_session import InMemorySessionInterface, Session
+from sanic_session import Session, AIORedisSessionInterface
 
 from admin import admin
 from admin.api import api_group
@@ -28,7 +28,13 @@ app.config.RESPONSE_TIMEOUT = 600
 app.config.FALLBACK_ERROR_FORMAT = 'html'
 app.config.DEBUG = True
 
-Session(app, interface=InMemorySessionInterface())
+Session(
+    app=app,
+    interface=AIORedisSessionInterface(
+        redis=cache,
+        domain=settings['base_url']
+    )
+)
 
 
 @app.listener('before_server_start')

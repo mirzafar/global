@@ -26,7 +26,7 @@ class LessonsView(BaseAPIView):
             ''' % pager.as_query()
         ))
 
-        total = await db.fetchval(
+        pager.total = await db.fetchval(
             '''
             SELECT count(*)
             FROM public.lessons l
@@ -36,11 +36,7 @@ class LessonsView(BaseAPIView):
 
         self.context['data'] = {
             'lessons': lessons,
-            'total': total,
-            'page': page,
-            'limit': limit,
-            'next_page': pager.next_page(total),
-            'prev_page': pager.prev_page(),
+            'pager': pager.dict()
         }
 
         return self.render_template(
