@@ -46,8 +46,9 @@ class TelegramWebhookHandler(HTTPMethodView):
                     RETURNING id, username
                 )
                 INSERT INTO public.accounts(uid, channel, user_id)
-                VALUES ($1, $2, new_user.id)
-                RETURNING new_user.id, new_user.username 
+                SELECT $1, $2, new_user.id
+                FROM new_user
+                RETURNING new_user.id, new_user.username
                 ''',
                 chat_id,
                 'tg',
