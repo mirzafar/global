@@ -7,6 +7,7 @@ from clients.telegram import tgclient
 from core.db import db
 from core.hasher import password_to_hash
 from utils.dicts import DictUtils
+from utils.strs import StrUtils
 
 
 class TelegramWebhookHandler(HTTPMethodView):
@@ -21,7 +22,7 @@ class TelegramWebhookHandler(HTTPMethodView):
         message = DictUtils.as_dict(data.get('message'))
 
         if message:
-            chat_id = message.get('chat', {}).get('id')
+            chat_id = StrUtils.to_str(message.get('chat', {}).get('id'))
             sender = message.get('from', {})
             customer = await db.fetchrow(
                 '''
