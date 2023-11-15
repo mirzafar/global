@@ -128,7 +128,7 @@
                                        data-bs-toggle="dropdown" aria-expanded="false">
                                         <div class="header-info2 d-flex align-items-center">
                                             <div class="header-media">
-                                                <img src="{% if _user and _user.photo %}/static/uploads/{{_user.photo}}{% else %}/static/images/noauthor.png{% endif %}"
+                                                <img src="{% if _user and _user.photo and _user.photo != 'None' %}/static/uploads/{{_user.photo}}{% else %}/static/images/noauthor.png{% endif %}"
                                                      alt="">
                                             </div>
                                         </div>
@@ -137,7 +137,7 @@
                                         <div class="card border-0 mb-0">
                                             <div class="card-header py-2">
                                                 <div class="products">
-                                                    <img src="{% if _user and _user.photo %}/static/uploads/{{_user.photo}}{% else %}/static/images/noauthor.png{% endif %}"
+                                                    <img src="{% if _user and _user.photo and _user.photo != 'None' %}/static/uploads/{{_user.photo}}{% else %}/static/images/noauthor.png{% endif %}"
                                                          class="avatar avatar-md" alt="">
                                                     <div>
                                                         <h6>{% if _user %}{{_user.last_name}} {{_user.first_name}}{%
