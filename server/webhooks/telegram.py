@@ -32,7 +32,7 @@ class TelegramWebhookHandler(HTTPMethodView):
                 WHERE channel = $1 AND uid = $2
                 ''',
                 'tg',
-                'uid'
+                chat_id
             )
         else:
             return response.json({})
