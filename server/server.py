@@ -58,7 +58,7 @@ app.static('/static', os.path.join(settings.get('file_path'), 'static'))
 
 if __name__ == '__main__':
     try:
-        app.run('127.0.0.1', port=7129, debug=True, access_log=False)
+        app.run('127.0.0.1', port=8129, debug=True, access_log=False)
     except Exception as e:
         print(e)
         loop = asyncio.get_event_loop()
