@@ -39,23 +39,30 @@ class TelegramWebhookHandler(HTTPMethodView):
         if not customer:
             customer = await db.fetchrow(
                 '''
-                WITH new_user AS (
-                    INSERT INTO public.users(last_name, username)
-                    VALUES ($3, $4)
-                    ON CONFLICT DO NOTHING
-                    RETURNING id, username
-                )
-                INSERT INTO public.accounts(uid, channel, user_id)
-                SELECT $1, $2, new_user.id
-                FROM new_user
-                RETURNING new_user.id, new_user.username
+                INSERT INTO public.users(last_name, username)
+                VALUES ($1, $2)
+                ON CONFLICT DO NOTHING
+                RETURNING id, username
                 ''',
-                chat_id,
-                'tg',
                 sender['first_name'],
                 sender['username']
             )
+
             if not customer:
+                return response.json({})
+
+            account = await db.fetchrow(
+                '''
+                INSERT INTO public.accounts(uid, channel, user_id)
+                VALUES ($1, $2, $3)
+                RETURNING *
+                ''',
+                chat_id,
+                'tg',
+                customer['id']
+            )
+
+            if not account:
                 return response.json({})
 
         if message and message.get('text') == '/start':
