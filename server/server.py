@@ -5,7 +5,7 @@ from sanic import Sanic
 from sanic_session import Session, AIORedisSessionInterface
 
 from admin import admin
-from admin.api import api_group
+from admin.api import api_group, MainView
 from api.core.collection import CollectionView
 from api.core.upload import UploadView
 from core.auth import auth
@@ -53,6 +53,7 @@ app.blueprint([
 
 app.add_route(CollectionView.as_view(), '/collection/<collection_name>/<action>/', name='collection.action')
 app.add_route(UploadView.as_view(), '/upload/', name='upload')
+app.add_route(MainView.as_view(), '/', name='index')
 
 app.static('/static', os.path.join(settings.get('file_path'), 'static'))
 
