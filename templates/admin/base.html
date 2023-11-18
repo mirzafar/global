@@ -208,7 +208,7 @@
                         <li><a href="/api/categories/">Категории</a></li>
                         {% endif %}
                         {% if _user and 'lessons' in (_user.permissions or []) %}
-                        <li><a href="/api/lessons/">Уроки</a></li>
+                        <li><a href="/api/lessons/template/">Уроки</a></li>
                         {% endif %}
                         {% if _user and 'users' in (_user.permissions or []) %}
                         <li><a href="/api/users/">Пользователи</a></li>

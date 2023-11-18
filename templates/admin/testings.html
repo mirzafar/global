@@ -222,9 +222,10 @@
                     page: pager.prev_page.toString()
                 });
             });
+            newElementALeft.append($('<i>').addClass('fa-solid fa-angle-left'))
+            newElementLiLeft.append(newElementALeft)
         }
-        newElementALeft.append($('<i>').addClass('fa-solid fa-angle-left'))
-        newElementLiLeft.append(newElementALeft)
+
         $("#list_pagination").append(newElementLiLeft);
 
         // ADD CURRENT
@@ -242,10 +243,9 @@
                     page: pager.next_page.toString()
                 });
             });
+            newElementARight.append($('<i>').addClass('fa-solid fa-angle-right'))
+            newElementLiRight.append(newElementARight)
         }
-
-        newElementARight.append($('<i>').addClass('fa-solid fa-angle-right'))
-        newElementLiRight.append(newElementARight)
         $("#list_pagination").append(newElementLiRight);
     }
 

@@ -15,9 +15,10 @@
                         <div class="table-responsive active-projects user-tbl  dt-filter">
                             <div id="user-tbl_wrapper" class="dataTables_wrapper no-footer">
                                 <div id="user-tbl_filter" class="dataTables_filter"><label> <i
-                                        class="fa-solid fa-magnifying-glass"></i><input type="search" class=""
-                                                                                        placeholder="Search..."
-                                                                                        aria-controls="user-tbl"></label>
+                                        class="fa-solid fa-magnifying-glass" id="searchButton"></i><input type="search"
+                                                                                                          placeholder="Поиск..."
+                                                                                                          id="searchInput"
+                                                                                                          aria-controls="user-tbl"></label>
                                 </div>
                                 <table class="table table-responsive-md">
                                     <thead>
@@ -27,53 +28,16 @@
                                         <th><strong></strong></th>
                                     </tr>
                                     </thead>
-                                    <tbody>
-                                    {% for item in data.lessons %}
-                                    <tr>
-                                        <td>
-                                            <span>{{ item.title }}</span>
-                                        </td>
-                                        <td>
-                                            <span>{{ item.description }}</span>
-                                        </td>
+                                    <tbody id="list_items">
 
-                                        <td>
-                                            <div class="d-flex">
-                                                <a class="btn btn-info shadow btn-xs sharp me-1"
-                                                   href="/api/lessons/{{item.id}}/"><i
-                                                        class="fa fa-info"></i></a>
-                                                 <a class="btn btn-page shadow btn-xs sharp me-1"
-                                                   href="/api/testings/questions/{{item.id}}/"><i
-                                                        class="fa fa-list"></i></a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
                                     </tbody>
                                 </table>
                                 <div class="row ">
-                                    <!-- column -->
                                     <div class="col-12 ps-3">
                                         <div class="table-pagenation">
                                             <nav>
-                                                <ul class="pagination pagination-sm">
-                                                    <li class="page-item page-indicator">
-                                                        <a class="page-link"
-                                                           {% if data.pager.prev_page %}
-                                                           href="/api/users/?limit={{data.pager.limit}}&page={{data.pager.prev_page}}"
-                                                           {% endif %}
-                                                        >
-                                                            <i class="fa-solid fa-angle-left"></i></a>
+                                                <ul class="pagination pagination-sm" id="list_pagination">
 
-                                                    </li>
-                                                    <li class="page-item "><a class="page-link">{{data.pager.page}}</a>
-                                                    </li>
-                                                    <li class="page-item page-indicator">
-                                                        <a class="page-link"
-                                                           {% if data.pager.next_page %}
-                                                           href="/api/users/?limit={{data.pager.limit}}&page={{data.pager.next_page}}"
-                                                           {% endif %}
-                                                        ><i class="fa-solid fa-angle-right"></i></a></li>
                                                 </ul>
                                             </nav>
                                         </div>
@@ -89,4 +53,134 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block js %}
+<script>
+    let urlParams = {}
+
+    getListItems();
+
+    function clearTable() {
+        $('#list_items tr').remove()
+        $('#list_pagination li').remove()
+    }
+
+    function getListItems(params) {
+        var paramsString = $.param(params);
+        var apiUrl = '/api/lessons/?';
+        if (paramsString) {
+            apiUrl += paramsString
+        }
+        $.ajax({
+            type: 'GET',
+            dataType: 'json',
+            url: apiUrl,
+            success: function (d) {
+                if (d['_success'] === true) {
+                    clearTable();
+
+                    $.each(d['lessons'], function (index, item) {
+                        showDataItem(item);
+                    });
+
+                    showPagination(d['pager']);
+
+                } else {
+                    alertShow('error', d['message']);
+                }
+            },
+            error: function (d) {
+                alertShow('waring');
+            }
+        })
+    }
+
+    function showDataItem(item) {
+        let newElementTr = $('<tr>');
+
+        let newElementTdTitle = $('<td>').text(item.title);
+        newElementTr.append(newElementTdTitle);
+
+        let newElementTdDescription = $('<td>').text(item.description);
+        newElementTr.append(newElementTdDescription);
+
+        let newElementTdActions = $('<td>');
+        let newElementTdActionsDiv = $('<div>').addClass('d-flex');
+
+        let newElementTdActionsDivAInfo = $('<a>').addClass('btn btn-info shadow btn-xs sharp me-1');
+        let newElementTdActionsDivAInfoI = $('<i>').addClass('fa fa-info');
+        newElementTdActionsDivAInfo.append(newElementTdActionsDivAInfoI)
+
+        let newElementTdActionsDivAQuestions = $('<a>').addClass('btn btn-page shadow btn-xs sharp me-1');
+        let newElementTdActionsDivAQuestionsI = $('<i>').addClass('fa fa-list');
+        newElementTdActionsDivAQuestions.append(newElementTdActionsDivAQuestionsI)
+
+        newElementTdActionsDiv.append(newElementTdActionsDivAInfo)
+        newElementTdActionsDiv.append(newElementTdActionsDivAQuestions)
+
+        newElementTdActions.append(newElementTdActionsDiv)
+        newElementTdActions.append(newElementTdActions)
+
+        newElementTr.append(newElementTdActions);
+
+        $(newElementTdActionsDivAInfo).on('click', function () {
+            location.href = '/api/lessons/' + item.id.toString()
+        })
+
+        $(newElementTdActionsDivAQuestions).on('click', function () {
+            location.href = '/api/testings/questions/' + item.id.toString()
+        })
+
+        $("#list_items").append(newElementTr);
+    }
+
+    function showPagination(pager) {
+
+        // ADD LEFT BUTTON PAGINATION
+        let newElementLiLeft = $('<li>').addClass('page-item page-indicator');
+        let newElementALeft = $('<a>').addClass('page-link')
+        if (pager.prev_page) {
+            $(newElementLiLeft).on("click", function () {
+                urlParams.limit = pager.limit.toString()
+                urlParams.page = pager.prev_page.toString()
+                getListItems(urlParams);
+            });
+            newElementALeft.append($('<i>').addClass('fa-solid fa-angle-left'))
+            newElementLiLeft.append(newElementALeft)
+        }
+
+        $("#list_pagination").append(newElementLiLeft);
+
+        // ADD CURRENT
+        let newElementLiCurrent = $('<li>').addClass('page-item');
+        newElementLiCurrent.append($('<a>').addClass('page-link').text(pager.page))
+        $("#list_pagination").append(newElementLiCurrent);
+
+        // ADD RIGHT BUTTON PAGINATION
+        let newElementLiRight = $('<li>').addClass('page-item page-indicator');
+        let newElementARight = $('<a>').addClass('page-link')
+        if (pager.next_page) {
+            $(newElementLiRight).on("click", function () {
+                urlParams.limit = pager.limit.toString()
+                urlParams.page = pager.next_page.toString()
+                getListItems(urlParams);
+            });
+            newElementARight.append($('<i>').addClass('fa-solid fa-angle-right'));
+            newElementLiRight.append(newElementARight);
+        }
+        $("#list_pagination").append(newElementLiRight);
+    }
+
+    $('#searchButton').on('click', function () {
+        urlParams.query = $('#searchInput').val();
+        getListItems(urlParams);
+    })
+
+    $('#searchInput').on('change', function () {
+        urlParams.query = $('#searchInput').val();
+        getListItems(urlParams);
+    })
+
+</script>
 {% endblock %}
