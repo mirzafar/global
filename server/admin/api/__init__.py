@@ -4,6 +4,7 @@ from admin.api.categories import category_bp
 from admin.api.lessons import lessons_bp
 from admin.api.main import MainView
 from admin.api.roles import role_bp
+from admin.api.testings import testing_bp
 from admin.api.users import users_bp
 
 main_bp = Blueprint('main', url_prefix='/')
@@ -16,5 +17,6 @@ api_group = Blueprint.group(
     category_bp,
     users_bp,
     lessons_bp,
+    testing_bp,
     url_prefix='/api'
 )

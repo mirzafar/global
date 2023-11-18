@@ -15,8 +15,17 @@ class LessonsCreateView(BaseAPIView):
             '''
         ))
 
-        self.context['data'] = {
-            'categories': categories
+        tags = ListUtils.to_list_of_dicts(await db.fetch(
+            '''
+            SELECT *
+            FROM public.tags
+            WHERE status >= 0
+            '''
+        ))
+
+        self.context = {
+            'categories': categories,
+            'tags': tags,
         }
 
         return self.render_template(

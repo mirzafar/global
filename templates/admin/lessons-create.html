@@ -23,7 +23,7 @@
                             <div class="dropdown bootstrap-select default-select form-control">
                                 <select class="default-select form-control" name="category_id" id="validationCustom05">
                                     <option value="">Выберите</option>
-                                    {% for category in data.categories %}
+                                    {% for category in categories %}
                                     <option value="{{category.id}}">{{category.title}}</option>
                                     {% endfor %}
                                 </select>
@@ -35,6 +35,24 @@
                             <div class="col-sm-9" data-name="logo">
                                 <input type="hidden" name="logo">
                                 <input class="form-control" type="file" id="new">
+                            </div>
+                        </div>
+                        <div class="col-sm-6 m-b30">
+                            <label class="form-label">Цена</label>
+                            <input type="number" class="form-control" name="price" min="1">
+                        </div>
+                        <div class="col-sm-6 m-b30">
+                            <label class="form-label">Скидка</label>
+                            <input type="number" class="form-control" name="discount" min="1" max="100">
+                        </div>
+                        <div class="col-sm-6 m-b30">
+                            <label class="form-label">Теги</label>
+                            <div class="dropdown bootstrap-select default-select form-control">
+                                <select class="default-select form-control" name="tag_ids" id="validationCustom15" multiple>
+                                    {% for tag in tags %}
+                                    <option value="{{tag.id}}">{{tag.title}}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -59,15 +77,14 @@
             url: '/api/lessons/new/',
             data: JSON.stringify(new_data),
             success: function (d) {
-                if (d['_success'] == true) {
-                    alert("good");
-                    location.href = '/api/lessons/'
+                if (d['_success'] === true) {
+                    alertShow('success')
                 } else {
-                    alert(d['message'])
+                    alertShow(d['message'], 'error');
                 }
             },
             error: function (d) {
-                alert("errors")
+                alertShow('waring');
             }
         });
         return false;
@@ -80,7 +97,7 @@
         uploadImage($(this).attr('id')).then(function (data) {
             input_name.val(String(data['file_name']));
         }, function (data) {
-            alert('error');
+            alertShow('waring');
         });
     });
 </script>

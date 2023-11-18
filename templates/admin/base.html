@@ -253,13 +253,17 @@ hljs.configure({ignoreUnescapedHTML: true})
     });
 </script>
 <script>
-    function alertShow(type, text) {
+    function alertShow(type, text, is_reload) {
         if (type === 'success') {
             $('#alert-success').css('display', 'block');
+            $('#alert-success span').text(text || '')
+            setTimeout(function () {
+                $('#alert-success').css('display', 'none');
+            }, 1500);
         } else if (type === 'error') {
             $('#alert-error').css('display', 'block');
+            $('#alert-error span').text(text)
             setTimeout(function () {
-                $('#alert-error span').text(text)
                 $('#alert-error').css('display', 'none');
             }, 1500);
             return
@@ -271,9 +275,11 @@ hljs.configure({ignoreUnescapedHTML: true})
             }, 1500);
             return
         }
-        setTimeout(function () {
-            location.reload();
-        }, 1000);
+        if (is_reload && is_reload === true) {
+            setTimeout(function () {
+                location.reload();
+            }, 1000);
+        }
     }
 
 </script>

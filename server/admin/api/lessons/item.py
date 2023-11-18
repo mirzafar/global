@@ -2,6 +2,7 @@ from sanic import response
 
 from core.db import db
 from core.handlers import BaseAPIView
+from utils.floats import FloatUtils
 from utils.ints import IntUtils
 from utils.lists import ListUtils
 from utils.strs import StrUtils
@@ -27,6 +28,11 @@ class LessonsItemView(BaseAPIView):
             lesson_id
         )
 
+        lesson = dict(lesson or {})
+
+        if lesson.get('discount') and 1 < lesson['discount'] < 100 and lesson.get('price'):
+            lesson['price'] = lesson['price'] * 100 / (100 - lesson['discount'])
+
         categories = ListUtils.to_list_of_dicts(await db.fetch(
             '''
             SELECT *
@@ -35,9 +41,18 @@ class LessonsItemView(BaseAPIView):
             '''
         ))
 
-        self.context['data'] = {
-            'lesson': dict(lesson or {}),
-            'categories': categories
+        tags = ListUtils.to_list_of_dicts(await db.fetch(
+            '''
+            SELECT *
+            FROM public.tags
+            WHERE status >= 0
+            '''
+        ))
+
+        self.context = {
+            'lesson': lesson,
+            'categories': categories,
+            'tags': tags,
         }
 
         return self.render_template(
@@ -51,6 +66,9 @@ class LessonsItemView(BaseAPIView):
         category_id = IntUtils.to_int(request.json.get('category_id'))
         logo = StrUtils.to_str(request.json.get('logo'))
         link = StrUtils.to_str(request.json.get('link'))
+        price = FloatUtils.to_float(request.json.get('price'), default=0.0)
+        discount = IntUtils.to_int(request.json.get('discount'), default=0)
+        tag_ids = ListUtils.to_list_of_ints(request.json.get('tag_ids'))
 
         if not title:
             return response.json({
@@ -58,11 +76,14 @@ class LessonsItemView(BaseAPIView):
                 'message': 'Required param(s): title'
             })
 
+        if discount and 1 < discount < 100:
+            price = price * (100 - discount) / 100
+
         lesson = await db.fetchrow(
             '''
             INSERT INTO public.lessons
-            (title, description, category_id, logo, link)
-            VALUES ($1, $2, $3, $4, $5)
+            (title, description, category_id, logo, link, price, discount, tag_ids)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING *
             ''',
             title,
@@ -70,6 +91,9 @@ class LessonsItemView(BaseAPIView):
             category_id,
             logo,
             link,
+            price,
+            discount,
+            tag_ids,
         )
 
         if not lesson:
@@ -95,6 +119,9 @@ class LessonsItemView(BaseAPIView):
         category_id = IntUtils.to_int(request.json.get('category_id'))
         logo = StrUtils.to_str(request.json.get('logo'))
         link = StrUtils.to_str(request.json.get('link'))
+        price = FloatUtils.to_float(request.json.get('price'), default=0.0)
+        discount = IntUtils.to_int(request.json.get('discount'), default=0)
+        tag_ids = ListUtils.to_list_of_ints(request.json.get('tag_ids'))
 
         if not title:
             return response.json({
@@ -102,10 +129,13 @@ class LessonsItemView(BaseAPIView):
                 'message': 'Required param(s): title'
             })
 
+        if discount and 1 < discount < 100:
+            price = price * (100 - discount) / 100
+
         lesson = await db.fetchrow(
             '''
             UPDATE public.lessons
-            SET title = $2, description = $3, category_id = $4, logo = $5, link = $6
+            SET title = $2, description = $3, category_id = $4, logo = $5, link = $6, price = $7, discount = $8, tag_ids = $9
             WHERE id = $1
             RETURNING *
             ''',
@@ -115,6 +145,9 @@ class LessonsItemView(BaseAPIView):
             category_id,
             logo,
             link,
+            price,
+            discount,
+            tag_ids
         )
 
         if not lesson:

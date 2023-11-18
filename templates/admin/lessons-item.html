@@ -1,6 +1,6 @@
 {% extends 'admin/base.html' %}
 {% block container %}
-<input type="hidden" id="user_id" value="{{data.lesson.id}}">
+<input type="hidden" id="user_id" value="{{lesson.id}}">
 <div class="row">
     <div class="col-xl-9 col-lg-8">
         <div class="card profile-card card-bx m-b30">
@@ -9,23 +9,23 @@
                     <div class="row new_data">
                         <div class="col-sm-6 m-b30">
                             <label class="form-label">Названия</label>
-                            <input type="text" class="form-control" name="title" value="{{data.lesson.title}}">
+                            <input type="text" class="form-control" name="title" value="{{lesson.title}}">
                         </div>
                         <div class="col-sm-6 m-b30">
                             <label class="form-label">Описания</label>
-                            <input type="text" class="form-control" name="description" value="{{data.lesson.description}}">
+                            <input type="text" class="form-control" name="description" value="{{lesson.description}}">
                         </div>
                         <div class="col-sm-6 m-b30">
                             <label class="form-label">URL</label>
-                            <input type="text" class="form-control" name="link" value="{{data.lesson.link}}">
+                            <input type="text" class="form-control" name="link" value="{{lesson.link}}">
                         </div>
                         <div class="col-sm-6 m-b30">
                             <label class="form-label">Категории</label>
                             <div class="dropdown bootstrap-select default-select form-control">
                                 <select class="default-select form-control" name="category_id" id="validationCustom05">
                                     <option value="">Выберите</option>
-                                    {% for category in data.categories %}
-                                    <option {% if data.lesson.category_id == category.id %}selected{% endif %} value="{{category.id}}">
+                                    {% for category in categories %}
+                                    <option {% if lesson.category_id == category.id %}selected{% endif %} value="{{category.id}}">
                                         {{category.title}}
                                     </option>
                                     {% endfor %}
@@ -37,12 +37,30 @@
                             <div class="tab-pane fade show active" id="home-tab-pane" role="tabpanel"
                                  aria-labelledby="home-tab" tabindex="0">
                                 <img style="width: 30%;" id="my_image" class="img-fluid rounded  "
-                                     src="/static/uploads/{{data.lesson.logo}}" alt="">
+                                     src="/static/uploads/{{lesson.logo}}" alt="">
                             </div>
                             <label class="form-label">Фото</label>
                             <div class="col-sm-9" data-name="logo">
-                                <input type="hidden" name="logo" value="{{data.lesson.logo}}">
+                                <input type="hidden" name="logo" value="{{lesson.logo}}">
                                 <input class="form-control" type="file" id="new">
+                            </div>
+                        </div>
+                        <div class="col-sm-6 m-b30">
+                            <label class="form-label">Цена</label>
+                            <input type="number" class="form-control" value="{% if lesson.price %}{{lesson.price}}{% endif %}" name="price" min="1">
+                        </div>
+                        <div class="col-sm-6 m-b30">
+                            <label class="form-label">Скидка</label>
+                            <input type="number" class="form-control" value="{% if lesson.discount %}{{lesson.discount}}{% endif %}" name="discount" min="1" max="100">
+                        </div>
+                        <div class="col-sm-6 m-b30">
+                            <label class="form-label">Теги</label>
+                            <div class="dropdown bootstrap-select default-select form-control">
+                                <select class="default-select form-control" name="tag_ids" id="validationCustom15" multiple>
+                                    {% for tag in tags %}
+                                    <option {% if tag.id in lesson.tag_ids %} selected {% endif %} value="{{tag.id}}">{{tag.title}}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -68,15 +86,14 @@
             url: '/api/lessons/' + $('#user_id').val(),
             data: JSON.stringify(new_data),
             success: function (d) {
-                if (d['_success'] == true) {
-                    alert("good");
-                    location.href = '/api/lessons/'
+                if (d['_success'] === true) {
+                    alertShow('success');
                 } else {
-                    alert(d['message'])
+                    alertShow(d['message'], 'error');
                 }
             },
             error: function (d) {
-                alert("errors")
+                alertShow('waring');
             }
         });
         return false;
@@ -88,15 +105,14 @@
             dataType: 'json',
             url: '/api/lessons/' + $('#user_id').val(),
             success: function (d) {
-                if (d['_success'] == true) {
-                    alert("good");
-                    location.href = '/api/lessons/'
+                if (d['_success'] === true) {
+                    alertShow('success');
                 } else {
-                    alert(d['message'])
+                    alertShow(d['message'], 'error');
                 }
             },
             error: function (d) {
-                alert("errors")
+                alertShow('waring');
             }
         });
         return false;
@@ -110,7 +126,7 @@
             input_name.val(String(data['file_name']));
             $('#my_image').attr('src', '/static/uploads/' + String(data['file_name']));
         }, function (data) {
-            alert('error');
+            alertShow('waring');
         });
     });
 </script>

@@ -115,7 +115,7 @@
             url: '/admin/login/',
             data: JSON.stringify(new_data),
             success: function (d) {
-                if (d['_success'] == true) {
+                if (d['_success'] === true) {
                     location.href = d['url']
                 } else {
                     alert(d['message'])
@@ -133,7 +133,7 @@
     });
 
     $(document).on("keypress", function (e) {
-        if (e.which == 13) {
+        if (e.which === 13) {
             $('.js-check-user').click();
         }
     });

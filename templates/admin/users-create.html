@@ -75,15 +75,14 @@
             url: '/api/users/new/',
             data: JSON.stringify(new_data),
             success: function (d) {
-                if (d['_success'] == true) {
-                    alert("good");
-                    location.href = '/api/users/'
+                if (d['_success'] === true) {
+                    alertShow('success');
                 } else {
-                    alert(d['message'])
+                    alertShow(d['message'], 'error');
                 }
             },
             error: function (d) {
-                alert("errors")
+                alertShow('waring');
             }
         });
         return false;

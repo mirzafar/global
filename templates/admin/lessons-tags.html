@@ -7,7 +7,7 @@
                 <div class="card dz-card" id="bootstrap-table2">
                     <div class="card-header flex-wrap d-flex justify-content-between  border-0">
                         <div>
-                            <h4 class="card-title">Роли</h4>
+                            <h4 class="card-title">Теги</h4>
                         </div>
                         <ul class="nav nav-tabs dzm-tabs" id="myTab" role="tablist">
                             <li class="nav-item" role="presentation">
@@ -26,7 +26,7 @@
                                         <tr>
                                             <th><strong>Название</strong></th>
                                             <th><strong>Описание</strong></th>
-                                            <th><strong>Статус</strong></th>
+                                            <th><strong>Категория</strong></th>
                                             <th><strong></strong></th>
                                         </tr>
                                         </thead>
@@ -34,25 +34,44 @@
                                         <tr data-id="new" class="js-cont odd" id="new" style="display: none">
                                             <td><input class="form-control" type="text" name="title"></td>
                                             <td><input class="form-control" type="text" name="description"></td>
+                                            <td><select name="parent_id">
+                                                <option value="">Выбрать</option>
+                                                {% for x in categories %}
+                                                <option value="{{x.id}}">{{x.title}}</option>
+                                                {% endfor %}
+                                            </select></td>
                                             <td>
                                                 <a class="btn btn-pill btn-success btn-air-success btn-air-success js-add-new">
                                                     Сохранить
                                                 </a>
                                             </td>
                                         </tr>
-                                        {% for role in data.roles %}
-                                        <tr class="js-cont" data-id="{{ role.id }}">
+                                        {% for item in tags %}
+                                        <tr class="js-cont" data-id="{{ item.id }}">
                                             <td>
-                                                <span>{{ role.title }}</span>
+                                                <span>{{ item.title }}</span>
                                                 <input style="display: none" type="text" class="form-control"
                                                        name="title"
-                                                       value="{{ role.title }}">
+                                                       value="{{ item.title }}">
                                             </td>
                                             <td>
-                                                <span>{{ role.description }}</span>
+                                                <span>{{ item.description }}</span>
                                                 <input style="display: none" type="text" class="form-control"
                                                        name="description"
-                                                       value="{{ role.description }}">
+                                                       value="{{ item.description }}">
+                                            </td>
+
+                                            <td>
+                                                <span>{{ item.category_title }}</span>
+                                                <div id="select-in-div" style="display: none"><select
+                                                        name="category_id">
+                                                    <option value="">Выбрать</option>
+                                                    {% for x in categories %}
+                                                    <option {% if item.category_id and item.category_id== x.id
+                                                            %}selected{% endif %} value="{{x.id}}">{{x.title}}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select></div>
                                             </td>
 
                                             <td>
@@ -96,17 +115,17 @@
         $.ajax({
             type: 'POST',
             dataType: 'json',
-            url: '/api/roles/' + new_id,
+            url: '/api/lessons/tags/' + new_id,
             data: JSON.stringify(new_data),
             success: function (d) {
                 if (d['_success'] === true) {
-                    alertShow('success');
+                    alertShow('success')
                 } else {
-                    alertShow(d['message'], 'error');
+                    alertShow(d['message'], 'error')
                 }
             },
             error: function (d) {
-                alertShow('waring');
+                alertShow('waring')
             }
         });
         return false;
@@ -117,17 +136,17 @@
         $.ajax({
             type: 'POST',
             dataType: 'json',
-            url: '/api/roles/' + new_id,
+            url: '/api/lessons/tags/' + new_id,
             data: JSON.stringify(new_data),
             success: function (d) {
                 if (d['_success'] === true) {
-                    alertShow('success');
+                    alertShow('success')
                 } else {
-                    alertShow(d['message'], 'error');
+                    alertShow(d['message'], 'error')
                 }
             },
             error: function (d) {
-                alertShow('waring');
+                alertShow('waring')
             }
         });
         return false;
@@ -138,17 +157,17 @@
         $.ajax({
             type: 'DELETE',
             dataType: 'json',
-            url: '/api/roles/' + new_id,
+            url: '/api/lessons/tags/' + new_id,
             data: JSON.stringify(new_data),
             success: function (d) {
                 if (d['_success'] === true) {
-                    alertShow('success');
+                    alertShow('success')
                 } else {
-                    alertShow(d['message'], 'error');
+                    alertShow(d['message'], 'error')
                 }
             },
             error: function (d) {
-                alertShow('waring');
+                alertShow('waring')
             }
         });
         return false;
@@ -158,6 +177,7 @@
         $(this).parents('tr').find('span').hide();
         $(this).parents('tr').find('input').show();
         $(this).parents('tr').find('select').show();
+        $(this).parents('tr').find('#select-in-div').show();
         $(this).parents('tr').find('.js-update').show();
         $(this).parents('tr').find('.js-cancel').show();
         $(this).parents('tr').find('.js-remove').hide();
