@@ -201,18 +201,20 @@
                     <span class="nav-text">Панель управления</span>
                 </a>
                     <ul aria-expanded="false">
-                        {% if _user and 'roles' in (_user.permissions or []) %}
+                        {% if _user and 'roles' in (_user.permissions or []) and _user.role_key in ['admin'] %}
                         <li><a href="/api/roles/">Роль</a></li>
                         {% endif %}
-                        {% if _user and 'categories' in (_user.permissions or []) %}
+                        {% if _user and 'categories' in (_user.permissions or []) and _user.role_key in ['admin'] %}
                         <li><a href="/api/categories/">Категории</a></li>
                         {% endif %}
-                        {% if _user and 'lessons' in (_user.permissions or []) %}
+                        {% if _user and 'lessons' in (_user.permissions or []) and _user.role_key in ['admin'] %}
                         <li><a href="/api/lessons/template/">Уроки</a></li>
                         {% endif %}
-                        {% if _user and 'users' in (_user.permissions or []) %}
+                        {% if _user and 'users' in (_user.permissions or []) and _user.role_key in ['admin'] %}
                         <li><a href="/api/users/">Пользователи</a></li>
                         {% endif %}
+
+
                     </ul>
                 </li>
             </ul>

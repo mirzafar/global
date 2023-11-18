@@ -117,9 +117,9 @@
             data: JSON.stringify(new_data),
             success: function (d) {
                 if (d['_success'] === true) {
-                    alertShow('success')
+                    alertShow('success', '', true)
                 } else {
-                    alertShow(d['message'], 'error')
+                    alertShow('error', d['message'])
                 }
             },
             error: function (d) {
@@ -138,9 +138,9 @@
             data: JSON.stringify(new_data),
             success: function (d) {
                 if (d['_success'] === true) {
-                    alertShow('success')
+                    alertShow('success', '', true)
                 } else {
-                    alertShow(d['message'], 'error')
+                    alertShow('error', d['message'])
                 }
             },
             error: function (d) {
@@ -159,9 +159,9 @@
             data: JSON.stringify(new_data),
             success: function (d) {
                 if (d['_success'] === true) {
-                    alertShow('success')
+                    alertShow('success', '', true)
                 } else {
-                    alertShow(d['message'], 'error')
+                    alertShow('error', d['message'])
                 }
             },
             error: function (d) {

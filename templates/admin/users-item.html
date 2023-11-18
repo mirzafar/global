@@ -49,9 +49,11 @@
                         <div class="col-sm-6 m-b30">
                             <label class="form-label">Разрешении</label>
                             <div class="dropdown bootstrap-select default-select form-control">
-                                <select class="default-select form-control" name="permissions" id="validationCustom07" multiple>
+                                <select class="default-select form-control" name="permissions" id="validationCustom07"
+                                        multiple>
                                     {% for permission in data.permissions %}
-                                    <option {% if permission.key in (data.user.permissions or []) %}selected{% endif %} value="{{permission.key}}">
+                                    <option {% if permission.key in (data.user.permissions or []) %}selected{% endif %}
+                                            value="{{permission.key}}">
                                         {{permission.title}}
                                     </option>
                                     {% endfor %}
@@ -101,8 +103,9 @@
             success: function (d) {
                 if (d['_success'] === true) {
                     alertShow('success');
+                    location.href = '/api/users/'
                 } else {
-                    alertShow(d['message'], 'error');
+                    alertShow('error', d['message']);
                 }
             },
             error: function (d) {
@@ -120,8 +123,9 @@
             success: function (d) {
                 if (d['_success'] === true) {
                     alertShow('success');
+                    location.href = '/api/users/'
                 } else {
-                    alertShow(d['message'], 'error');
+                    alertShow('error', d['message']);
                 }
             },
             error: function (d) {

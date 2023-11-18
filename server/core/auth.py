@@ -48,6 +48,7 @@ class Auth:
                     u.password,
                     u.username,
                     r.title AS role_title,
+                    r.key AS role_key,
                     u.photo
                 FROM public.users u
                 LEFT JOIN public.roles r ON u.role_id = r.id
