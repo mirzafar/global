@@ -122,6 +122,8 @@ class LessonsItemView(BaseAPIView):
         price = FloatUtils.to_float(request.json.get('price'), default=0.0)
         discount = IntUtils.to_int(request.json.get('discount'), default=0)
         tag_ids = ListUtils.to_list_of_ints(request.json.get('tag_ids'))
+        testing_state = IntUtils.to_int(request.json.get('testing_state'))
+        testing_count = IntUtils.to_int(request.json.get('testing_count'))
 
         if not title:
             return response.json({
@@ -135,7 +137,17 @@ class LessonsItemView(BaseAPIView):
         lesson = await db.fetchrow(
             '''
             UPDATE public.lessons
-            SET title = $2, description = $3, category_id = $4, logo = $5, link = $6, price = $7, discount = $8, tag_ids = $9
+            SET 
+                title = $2,
+                description = $3, 
+                category_id = $4,
+                logo = $5, 
+                link = $6, 
+                price = $7, 
+                discount = $8, 
+                tag_ids = $9, 
+                testing_count = $10, 
+                testing_state = $11
             WHERE id = $1
             RETURNING *
             ''',
@@ -147,7 +159,9 @@ class LessonsItemView(BaseAPIView):
             link,
             price,
             discount,
-            tag_ids
+            tag_ids,
+            testing_count,
+            testing_state,
         )
 
         if not lesson:

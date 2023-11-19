@@ -25,7 +25,8 @@
                                 <select class="default-select form-control" name="category_id" id="validationCustom05">
                                     <option value="">Выберите</option>
                                     {% for category in categories %}
-                                    <option {% if lesson.category_id == category.id %}selected{% endif %} value="{{category.id}}">
+                                    <option {% if lesson.category_id== category.id %}selected{% endif %}
+                                            value="{{category.id}}">
                                         {{category.title}}
                                     </option>
                                     {% endfor %}
@@ -47,18 +48,39 @@
                         </div>
                         <div class="col-sm-6 m-b30">
                             <label class="form-label">Цена</label>
-                            <input type="number" class="form-control" value="{% if lesson.price %}{{lesson.price}}{% endif %}" name="price" min="1">
+                            <input type="number" class="form-control"
+                                   value="{% if lesson.price %}{{lesson.price}}{% endif %}" name="price" min="1">
                         </div>
                         <div class="col-sm-6 m-b30">
                             <label class="form-label">Скидка</label>
-                            <input type="number" class="form-control" value="{% if lesson.discount %}{{lesson.discount}}{% endif %}" name="discount" min="1" max="100">
+                            <input type="number" class="form-control"
+                                   value="{% if lesson.discount %}{{lesson.discount}}{% endif %}" name="discount"
+                                   min="1" max="100">
+                        </div>
+                        <div class="col-sm-6 m-b30">
+                            <label class="form-label">Количества попыток на тестирование</label>
+                            <input type="number" class="form-control"
+                                   value="{% if lesson.testing_count %}{{lesson.testing_count}}{% endif %}"
+                                   name="testing_count" min="1" max="100">
+                        </div>
+                        <div class="col-sm-6 m-b30">
+                            <label class="form-label">Статус тестирования</label>
+                            <div class="dropdown bootstrap-select default-select form-control">
+                                <select class="default-select form-control" name="testing_state" id="validationCustom25">
+                                    <option {% if lesson.testing_state == 0 %} selected {% endif %} value="0">Деактивировать</option>
+                                    <option {% if lesson.testing_state == 1 %} selected {% endif %} value="1">Активировать</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="col-sm-6 m-b30">
                             <label class="form-label">Теги</label>
                             <div class="dropdown bootstrap-select default-select form-control">
-                                <select class="default-select form-control" name="tag_ids" id="validationCustom15" multiple>
+                                <select class="default-select form-control" name="tag_ids" id="validationCustom15"
+                                        multiple>
                                     {% for tag in tags %}
-                                    <option {% if tag.id in lesson.tag_ids %} selected {% endif %} value="{{tag.id}}">{{tag.title}}</option>
+                                    <option {% if tag.id in lesson.tag_ids %} selected {% endif %} value="{{tag.id}}">
+                                        {{tag.title}}
+                                    </option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -88,7 +110,7 @@
             success: function (d) {
                 if (d['_success'] === true) {
                     alertShow('success');
-                    location.href = '/api/lessons/'
+                    location.href = '/api/lessons/template/'
                 } else {
                     alertShow('error', d['message']);
                 }
@@ -108,7 +130,7 @@
             success: function (d) {
                 if (d['_success'] === true) {
                     alertShow('success');
-                    location.href = '/api/lessons/'
+                    location.href = '/api/lessons/template/'
                 } else {
                     alertShow('error', d['message']);
                 }

@@ -116,8 +116,13 @@
         let newElementTdActionsDivAQuestionsI = $('<i>').addClass('fa fa-list');
         newElementTdActionsDivAQuestions.append(newElementTdActionsDivAQuestionsI)
 
+        let newElementShowResultTest = $('<a>').addClass('btn btn-page shadow btn-xs sharp me-1');
+        let newElementShowResultTestI = $('<i>').addClass('fa fa-eye');
+        newElementShowResultTest.append(newElementShowResultTestI)
+
         newElementTdActionsDiv.append(newElementTdActionsDivAInfo)
         newElementTdActionsDiv.append(newElementTdActionsDivAQuestions)
+        newElementTdActionsDiv.append(newElementShowResultTest)
 
         newElementTdActions.append(newElementTdActionsDiv)
         newElementTdActions.append(newElementTdActions)
@@ -130,6 +135,10 @@
 
         $(newElementTdActionsDivAQuestions).on('click', function () {
             location.href = '/api/testings/questions/' + item.id.toString()
+        })
+
+        $(newElementShowResultTest).on('click', function () {
+            location.href = '/api/testings/result/' + item.id.toString()
         })
 
         $("#list_items").append(newElementTr);

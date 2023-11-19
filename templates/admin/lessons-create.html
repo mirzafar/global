@@ -79,7 +79,7 @@
             success: function (d) {
                 if (d['_success'] === true) {
                     alertShow('success')
-                    location.href = '/api/lessons/'
+                    location.href = '/api/lessons/template/'
                 } else {
                     alertShow('error', d['message']);
                 }

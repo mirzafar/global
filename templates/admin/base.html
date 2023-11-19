@@ -19,6 +19,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">
     <link href="/static/css/bootstrap-select.min.css" rel="stylesheet">
     <link href="/static/css/style.css" rel="stylesheet">
+    <link href="/static/css/sweetalert2.min.css" rel="stylesheet">
 
     <style>
         .main-alert {
@@ -47,6 +48,17 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="btn-close">
         </button>
     </div>
+    <div style="display: none" id="alert-info" class="alert alert-info solid alert-dismissible fade show">
+        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"
+             stroke-linecap="round" stroke-linejoin="round" class="me-2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <strong>Info!</strong> <span></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="btn-close">
+        </button>
+    </div>
     <div style="display: none" id="alert-waring" class="alert alert-warning solid alert-dismissible fade show">
         <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"
              stroke-linecap="round" stroke-linejoin="round" class="me-2">
@@ -54,7 +66,7 @@
             <line x1="12" y1="9" x2="12" y2="13"></line>
             <line x1="12" y1="17" x2="12.01" y2="17"></line>
         </svg>
-        <strong>Warning!</strong> Something went wrong. Please check.
+        <strong>Warning!</strong> <span>Something went wrong. Please check.</span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="btn-close">
         </button>
     </div>
@@ -207,7 +219,7 @@
                         {% if _user and 'categories' in (_user.permissions or []) and _user.role_key in ['admin'] %}
                         <li><a href="/api/categories/">Категории</a></li>
                         {% endif %}
-                        {% if _user and 'lessons' in (_user.permissions or []) and _user.role_key in ['admin'] %}
+                        {% if _user and 'lessons' in (_user.permissions or []) %}
                         <li><a href="/api/lessons/template/">Уроки</a></li>
                         {% endif %}
                         {% if _user and 'users' in (_user.permissions or []) and _user.role_key in ['admin'] %}
@@ -233,6 +245,8 @@
 </div>
 
 <script src="/static/js/global.min.js"></script>
+<script src="/static/js/sweetalert2.min.js"></script>
+<script src="/static/js/sweetalert.init.js"></script>
 <script src="/static/js/bootstrap-select.min.js"></script>
 <script src="/static/js/custom.js"></script>
 <script src="/static/js/deznav-init.js"></script>
@@ -272,15 +286,38 @@ hljs.configure({ignoreUnescapedHTML: true})
 
         } else if (type === 'waring') {
             $('#alert-waring').css('display', 'block');
+            if (text) {
+                $('#alert-waring span').text(text)
+            }
             setTimeout(function () {
                 $('#alert-waring').css('display', 'none');
             }, 1500);
+            return
+        } else if (type === 'info') {
+            $('#alert-info').css('display', 'block');
+            $('#alert-info span').text(text)
+            setTimeout(function () {
+                $('#alert-info').css('display', 'none');
+            }, 2500);
             return
         }
         if (is_reload && is_reload === true) {
             setTimeout(function () {
                 location.reload();
             }, 1000);
+        }
+    }
+
+    function confirmShow(type, text, mode) {
+        if (type === 'danger') {
+            if (mode === 'show') {
+                $('#confirm-danger').css('display', 'block');
+                $('#confirm-danger span').text(text)
+
+            } else {
+                $('#confirm-danger').css('display', 'none');
+                $('#confirm-danger span').text(text)
+            }
         }
     }
 

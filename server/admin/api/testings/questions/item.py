@@ -3,11 +3,11 @@ from sanic import response
 from core.db import db
 from core.handlers import BaseAPIView
 from utils.ints import IntUtils
+from utils.lists import ListUtils
 from utils.strs import StrUtils
 
 
 class TestingsQuestionsItemAPIView(BaseAPIView):
-
     async def post(self, request, user, question_id):
         question_id = IntUtils.to_int(question_id)
         if not question_id:
@@ -21,6 +21,7 @@ class TestingsQuestionsItemAPIView(BaseAPIView):
         photo = StrUtils.to_str(request.json.get('photo'))
         audio = StrUtils.to_str(request.json.get('audio'))
         video_link = StrUtils.to_str(request.json.get('video_link'))
+        current_answer_id = IntUtils.to_int(request.json.get('current_answer_id'))
 
         if not title:
             return response.json({
@@ -31,7 +32,7 @@ class TestingsQuestionsItemAPIView(BaseAPIView):
         question = await db.fetchrow(
             '''
             UPDATE testings.questions
-            SET title = $2, description = $3, video_link = $4, audio = $5, photo = $6
+            SET title = $2, description = $3, video_link = $4, audio = $5, photo = $6, current_answer_id = $7
             WHERE id = $1
             RETURNING *
             ''',
@@ -41,6 +42,7 @@ class TestingsQuestionsItemAPIView(BaseAPIView):
             video_link,
             audio,
             photo,
+            current_answer_id,
         )
 
         if not question:

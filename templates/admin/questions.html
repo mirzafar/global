@@ -54,6 +54,13 @@
                                 <label class="form-label">Url Video</label>
                                 <input type="text" class="form-control" name="video_link">
                             </div>
+                            <div class="col-sm-6 m-b30">
+                                <label class="form-label">Правильный ответ</label>
+                                <select class="form-control" name="current_answer_id"
+                                        id="select_answers">
+
+                                </select>
+                            </div>
                             <div class="ol-sm-6 m-b30">
                                 <label class="form-label">Фото</label>
                                 <div class="col-sm-9" data-name="photo">
@@ -136,6 +143,7 @@
 
     $('#save_new_item').on('click', function () {
         var new_data = getValues('#new_item_column')
+        console.log(new_data)
         $.ajax({
             type: 'POST',
             dataType: 'json',
@@ -144,7 +152,7 @@
             success: function (d) {
                 if (d['_success'] === true) {
                     alertShow('success');
-                    showButtonAddCancel();
+                    showButtonAddCancel(d.questions);
 
 
                     let newElementLi = $('<li>')
@@ -251,7 +259,7 @@
     function showEditInput(elementLi, question) {
         $('#update_new_item').show();
         $('#save_new_item').hide();
-        showButtonAddCancel();
+        showButtonAddCancel(question);
 
         $('#new_item_column input[name="title"]').val(question.title);
         $('#new_item_column input[name="description"]').val(question.description);
@@ -310,12 +318,43 @@
         clearRecorder();
     }
 
-    function showButtonAddCancel() {
+    function showAnswers(question) {
+        $('#select_answers').empty()
+        if (question) {
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                url: '/api/testings/answers/' + question.id.toString() + '/list/',
+                success: function (d) {
+                    console.log(d)
+                    if (d['_success'] === true) {
+                        $('#select_answers').append($('<option>').text('Выберите').attr('selected', 'selected'))
+                        $.each(d['answers'], function (index, answer) {
+                            console.log(answer)
+                            let newElementOption = $('<option>').text(answer.title).val(answer.id);
+                            if (question.current_answer_id === answer.id) {
+                                newElementOption.attr('selected', 'selected')
+                            }
+                            $('#select_answers').append(newElementOption)
+
+                        });
+                    } else {
+                        alertShow('error', d['message'])
+                    }
+                },
+                error: function (d) {
+                    alertShow('waring');
+                }
+            });
+        }
+    }
+
+    function showButtonAddCancel(question) {
         $('#list_items').toggle();
         $('#new_item_column').toggle();
         if ($('#add_question').data('id') === 'add') {
             $('#add_question').data('id', 'cancel').text('Отмена')
-
+            showAnswers(question)
 
         } else {
             $('#add_question').data('id', 'add').text('Создать')
@@ -325,7 +364,7 @@
 
     $('#add_question').click(function () {
         $('#save_new_item').show();
-        showButtonAddCancel();
+        showButtonAddCancel(null);
     });
 
     function deleteQuestion(ElementLi, question) {
@@ -350,6 +389,7 @@
 
     function updateQuestion(elementLi, question) {
         var new_data = getValues('#new_item_column')
+        console.log(new_data)
         $.ajax({
             type: 'POST',
             dataType: 'json',
@@ -357,16 +397,7 @@
             data: JSON.stringify(new_data),
             success: function (d) {
                 if (d['_success'] === true) {
-                    alertShow('success');
-
-                    showButtonAddCancel();
-                    clearAllInfo();
-                    $('#update_new_item').hide()
-                    $('#save_new_item').hide()
-
-                    elementLi.text(d.question.title);
-                    question.title = d.question.title
-                    addEditAnswersDeleteButtons(elementLi, question)
+                    alertShow('success', '', true);
 
                 } else {
                     alertShow('error', d['message']);
