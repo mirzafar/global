@@ -1,11 +1,11 @@
 from sanic import response
 
 from core.db import db
+from core.encoder import encoder
 from core.handlers import BaseAPIView
 from core.pager import Pager
 from utils.ints import IntUtils
 from utils.lists import ListUtils
-from utils.strs import StrUtils
 
 
 class TestingsResultsAPIView(BaseAPIView):
@@ -24,12 +24,15 @@ class TestingsResultsAPIView(BaseAPIView):
         pager.set_page(page)
         pager.set_limit(limit)
 
-        questions = ListUtils.to_list_of_dicts(await db.fetch(
+        cond, cond_vars = [], []
+
+        results = ListUtils.to_list_of_dicts(await db.fetch(
             '''
-            SELECT *
-            FROM testings.questions
-            WHERE status >= 0 AND lesson_id = $1
-            ORDER BY id DESC
+            SELECT r.*, u.username, u.last_name, u.first_name
+            FROM testings.results r
+            LEFT JOIN public.users u ON r.user_id = u.id
+            WHERE r.lesson_id = $1
+            ORDER BY r.id DESC
             %s
             ''' % pager.as_query(),
             lesson_id,
@@ -38,7 +41,7 @@ class TestingsResultsAPIView(BaseAPIView):
         pager.total = await db.fetchval(
             '''
             SELECT count(*)
-            FROM testings.questions
+            FROM testings.results
             WHERE status >= 0 AND lesson_id = $1
             ''',
             lesson_id,
@@ -46,6 +49,6 @@ class TestingsResultsAPIView(BaseAPIView):
 
         return response.json({
             '_success': True,
-            'questions': questions,
+            'results': results,
             'pager': pager.dict(),
-        })
+        }, dumps=encoder.encode)

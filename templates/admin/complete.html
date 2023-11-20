@@ -1,5 +1,11 @@
 {% extends 'admin/base.html' %}
+{% block namePage %}
+Тестирование
+{% endblock %}
 {% block container %}
+<button type="button" id="back_url" class="btn btn-page"><span class="btn-icon-start text-info"><i
+        class="fa fa-left-long color-info"></i></span>Назад
+</button>
 <div class="row">
     <div class="col-lg-6 col-md-8">
         <div class="card" id="main"></div>
@@ -52,6 +58,7 @@
     }
 
     function showQuestion(question, isLast) {
+        $('#back_url').hide()
         $('#main').empty()
         let newElementDivCartHeader = $('<div>').addClass('card-header');
         newElementDivCartHeader.append(

@@ -1,14 +1,13 @@
 {% extends 'admin/base.html' %}
 {% block namePage %}
-Уроки
+Peзултаты
 {% endblock %}
 {% block container %}
+<button type="button" id="back_url" class="btn btn-page"><span class="btn-icon-start text-info"><i
+        class="fa fa-left-long color-info"></i></span>Назад
+</button>
 <div class="row">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center">
-            <a href="/api/lessons/create/" class="btn btn-primary btn-sm ms-2">+ Создать</a>
-        </div>
-    </div>
+
     <div class="col-xl-10 active-p">
         <div class="tab-content" id="pills-tabContent">
             <div class="tab-pane fade show active" id="pills-colm" role="tabpanel" aria-labelledby="pills-colm-tab">
@@ -16,18 +15,14 @@
                     <div class="card-body px-0">
                         <div class="table-responsive active-projects user-tbl  dt-filter">
                             <div id="user-tbl_wrapper" class="dataTables_wrapper no-footer">
-                                <div id="user-tbl_filter" class="dataTables_filter"><label> <i
-                                        class="fa-solid fa-magnifying-glass" id="searchButton"></i><input type="search"
-                                                                                                          placeholder="Поиск..."
-                                                                                                          id="searchInput"
-                                                                                                          aria-controls="user-tbl"></label>
-                                </div>
                                 <table class="table table-responsive-md">
                                     <thead>
                                     <tr>
-                                        <th><strong>Название</strong></th>
-                                        <th><strong>Описания</strong></th>
-                                        <th><strong></strong></th>
+                                        <th><strong>Фамилия</strong></th>
+                                        <th><strong>Имя</strong></th>
+                                        <th><strong>Тотал/Правильный/Ошибка</strong></th>
+                                        <th><strong>Начала</strong></th>
+                                        <th><strong>Конец</strong></th>
                                     </tr>
                                     </thead>
                                     <tbody id="list_items">
@@ -59,6 +54,9 @@
 
 {% block js %}
 <script>
+    let curl_url = location.pathname.split('/');
+    let lesson_id = curl_url[curl_url.length - 3];
+
     let urlParams = {}
 
     getListItems();
@@ -70,7 +68,7 @@
 
     function getListItems(params) {
         var paramsString = $.param(params);
-        var apiUrl = '/api/lessons/?';
+        var apiUrl = '/api/testings/results/' + lesson_id.toString() + '/list?';
         if (paramsString) {
             apiUrl += paramsString
         }
@@ -82,7 +80,7 @@
                 if (d['_success'] === true) {
                     clearTable();
 
-                    $.each(d['lessons'], function (index, item) {
+                    $.each(d['results'], function (index, item) {
                         showDataItem(item);
                     });
 
@@ -101,56 +99,38 @@
     function showDataItem(item) {
         let newElementTr = $('<tr>');
 
-        let newElementTdTitle = $('<td>').text(item.title);
+        let newElementTdTitle = $('<td>').text(item.last_name);
         newElementTr.append(newElementTdTitle);
 
-        let newElementTdDescription = $('<td>').text(item.description);
+        let newElementTdDescription = $('<td>').text(item.first_name);
         newElementTr.append(newElementTdDescription);
 
-        let newElementTdActions = $('<td>');
-        let newElementTdActionsDiv = $('<div>').addClass('d-flex');
+        let newElementTdResult = $('<td>').text(item.total.toString() + '/' + item.currect.toString() + '/' + item.wrong.toString());
+        newElementTr.append(newElementTdResult);
 
-        let newElementTdActionsDivAInfo = $('<a>').addClass('btn btn-info shadow btn-xs sharp me-1');
-        let newElementTdActionsDivAInfoI = $('<i>').addClass('fa fa-info');
-        newElementTdActionsDivAInfo.append(newElementTdActionsDivAInfoI)
+        var start_date = new Date(item.started_at * 1000);
+        var started_at = start_date.toLocaleString('ru-RU', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+        let newElementTdCreated = $('<td>').text(started_at);
+        newElementTr.append(newElementTdCreated);
 
-        let newElementTdActionsDivAQuestions = $('<a>').addClass('btn btn-page shadow btn-xs sharp me-1');
-        let newElementTdActionsDivAQuestionsI = $('<i>').addClass('fa fa-list');
-        newElementTdActionsDivAQuestions.append(newElementTdActionsDivAQuestionsI)
-
-        let newElementShowResultTest = $('<a>').addClass('btn btn-page shadow btn-xs sharp me-1');
-        let newElementShowResultTestI = $('<i>').addClass('fa fa-eye');
-        newElementShowResultTest.append(newElementShowResultTestI)
-
-        let newElementShowResultTesting = $('<a>').addClass('btn btn-page shadow btn-xs sharp me-1');
-        let newElementShowResultTestingI = $('<i>').addClass('fa fa-align-justify');
-        newElementShowResultTesting.append(newElementShowResultTestingI)
-
-        newElementTdActionsDiv.append(newElementTdActionsDivAInfo)
-        newElementTdActionsDiv.append(newElementTdActionsDivAQuestions)
-        newElementTdActionsDiv.append(newElementShowResultTest)
-        newElementTdActionsDiv.append(newElementShowResultTesting)
-
-        newElementTdActions.append(newElementTdActionsDiv)
-        newElementTdActions.append(newElementTdActions)
-
-        newElementTr.append(newElementTdActions);
-
-        $(newElementTdActionsDivAInfo).on('click', function () {
-            location.href = '/api/lessons/' + item.id.toString()
-        })
-
-        $(newElementTdActionsDivAQuestions).on('click', function () {
-            location.href = '/api/testings/questions/' + item.id.toString()
-        })
-
-        $(newElementShowResultTest).on('click', function () {
-            location.href = '/api/testings/results/' + item.id.toString() + '/template/'
-        })
-
-        $(newElementShowResultTesting).on('click', function () {
-            location.href = '/api/testings/complete/' + item.id.toString() + '/template/'
-        })
+        var end_date = new Date(item.ended_at * 1000);
+        var ended_at = end_date.toLocaleString('ru-RU', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        });
+        let newElementTdEnded = $('<td>').text(ended_at);
+        newElementTr.append(newElementTdEnded);
 
         $("#list_items").append(newElementTr);
     }

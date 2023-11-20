@@ -269,6 +269,10 @@ hljs.configure({ignoreUnescapedHTML: true})
     });
 </script>
 <script>
+    $('#back_url').on('click', function () {
+        window.history.back();
+    })
+
     function alertShow(type, text, is_reload) {
         if (type === 'success') {
             $('#alert-success').css('display', 'block');
