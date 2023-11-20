@@ -5,6 +5,7 @@ from core.encoder import encoder
 from core.handlers import BaseAPIView
 from core.pager import Pager
 from core.tools import set_counters
+from utils.bools import BoolUtils
 from utils.lists import ListUtils
 from utils.strs import StrUtils
 
@@ -20,6 +21,7 @@ class LessonsView(BaseAPIView):
         pager.set_limit(limit)
 
         query = StrUtils.to_str(request.args.get('query'))
+        is_me = BoolUtils.to_bool(request.args.get('is_me'), default=False)
 
         cond, cond_vars = ['l.status >= {}'], [0]
 
@@ -27,17 +29,24 @@ class LessonsView(BaseAPIView):
             cond.append('l.title ILIKE {}')
             cond_vars.append(f'%{query}%')
 
-        cond, _ = set_counters(' AND '.join(cond))
+        if is_me:
+            cond.append('$1 = ANY (l.subscribers)')
+
+        cond, _ = set_counters(' AND '.join(cond), counter=2)
 
         lessons = ListUtils.to_list_of_dicts(await db.fetch(
             '''
-            SELECT 
-                l.*
+            SELECT
+                l.*,
+                c.title AS category_title,
+                $1 = ANY (l.subscribers) AS is_subscribe
             FROM public.lessons l
+            LEFT JOIN categories c ON l.category_id = c.id
             WHERE %s
             ORDER BY l.id DESC
             %s
             ''' % (cond, pager.as_query()),
+            user['id'],
             *cond_vars
         ))
 
@@ -52,7 +61,8 @@ class LessonsView(BaseAPIView):
         self.context = {
             '_success': True,
             'lessons': lessons,
-            'pager': pager.dict()
+            'pager': pager.dict(),
+            'user': dict(user)
         }
 
         return response.json(self.context, dumps=encoder.encode)

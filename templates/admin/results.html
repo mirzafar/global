@@ -56,10 +56,20 @@ Peзултаты
 <script>
     let curl_url = location.pathname.split('/');
     let lesson_id = curl_url[curl_url.length - 3];
+    let urlParams = getURLParameters() || {}
 
-    let urlParams = {}
+    function getURLParameters() {
+        var params = new URLSearchParams(window.location.search);
+        var parameterObject = {};
 
-    getListItems();
+        for (var pair of params.entries()) {
+            parameterObject[pair[0]] = pair[1];
+        }
+
+        return parameterObject;
+    }
+
+    getListItems(urlParams);
 
     function clearTable() {
         $('#list_items tr').remove()

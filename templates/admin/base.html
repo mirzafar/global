@@ -225,8 +225,9 @@
                         {% if _user and 'users' in (_user.permissions or []) and _user.role_key in ['admin'] %}
                         <li><a href="/api/users/">Пользователи</a></li>
                         {% endif %}
-
-
+                        {% if _user and 'my_lessons' in (_user.permissions or []) %}
+                        <li><a href="/api/lessons/me/template/">Мои уроки</a></li>
+                        {% endif %}
                     </ul>
                 </li>
             </ul>
@@ -251,7 +252,6 @@
 <script src="/static/js/custom.js"></script>
 <script src="/static/js/deznav-init.js"></script>
 <script src="/static/js/demo.js"></script>
-<!--	<script src="/static/js/jquery-3.6.0.min.js"></script>-->
 <script src="/static/js/manage.js"></script>
 <script src="/static/js/uploder.js"></script>
 

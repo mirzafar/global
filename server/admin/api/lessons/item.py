@@ -61,46 +61,90 @@ class LessonsItemView(BaseAPIView):
         )
 
     async def post(self, request, user, lesson_id):
-        title = StrUtils.to_str(request.json.get('title'))
-        description = StrUtils.to_str(request.json.get('description'))
-        category_id = IntUtils.to_int(request.json.get('category_id'))
-        logo = StrUtils.to_str(request.json.get('logo'))
-        link = StrUtils.to_str(request.json.get('link'))
-        price = FloatUtils.to_float(request.json.get('price'), default=0.0)
-        discount = IntUtils.to_int(request.json.get('discount'), default=0)
-        tag_ids = ListUtils.to_list_of_ints(request.json.get('tag_ids'))
+        action = StrUtils.to_str(request.json.get('action'), default='create')
+        if action == 'create':
+            title = StrUtils.to_str(request.json.get('title'))
+            description = StrUtils.to_str(request.json.get('description'))
+            category_id = IntUtils.to_int(request.json.get('category_id'))
+            logo = StrUtils.to_str(request.json.get('logo'))
+            link = StrUtils.to_str(request.json.get('link'))
+            price = FloatUtils.to_float(request.json.get('price'), default=0.0)
+            discount = IntUtils.to_int(request.json.get('discount'), default=0)
+            tag_ids = ListUtils.to_list_of_ints(request.json.get('tag_ids'))
 
-        if not title:
+            if not title:
+                return response.json({
+                    '_success': False,
+                    'message': 'Required param(s): title'
+                })
+
+            if discount and 1 < discount < 100:
+                price = price * (100 - discount) / 100
+
+            lesson = await db.fetchrow(
+                '''
+                INSERT INTO public.lessons
+                (title, description, category_id, logo, link, price, discount, tag_ids)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                RETURNING *
+                ''',
+                title,
+                description,
+                category_id,
+                logo,
+                link,
+                price,
+                discount,
+                tag_ids,
+            )
+
+            if not lesson:
+                return response.json({
+                    '_success': False,
+                    'message': 'Operation failed'
+                })
+
             return response.json({
-                '_success': False,
-                'message': 'Required param(s): title'
+                '_success': True
             })
 
-        if discount and 1 < discount < 100:
-            price = price * (100 - discount) / 100
+        elif action == 'subscribe':
+            lesson_id = IntUtils.to_int(lesson_id)
+            if not lesson_id:
+                return response.json({
+                    '_success': False,
+                    'message': 'Required param(s): user_id'
+                })
 
-        lesson = await db.fetchrow(
-            '''
-            INSERT INTO public.lessons
-            (title, description, category_id, logo, link, price, discount, tag_ids)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING *
-            ''',
-            title,
-            description,
-            category_id,
-            logo,
-            link,
-            price,
-            discount,
-            tag_ids,
-        )
+            await db.fetchrow(
+                '''
+                UPDATE public.lessons
+                SET subscribers = array_append(COALESCE(subscribers, ARRAY[]::integer[]), $2)
+                WHERE id = $1 AND $2 != ALL (subscribers)
+                RETURNING *
+                ''',
+                lesson_id,
+                user['id'],
+            )
 
-        if not lesson:
-            return response.json({
-                '_success': False,
-                'message': 'Operation failed'
-            })
+        elif action == 'unsubscribe':
+            lesson_id = IntUtils.to_int(lesson_id)
+            if not lesson_id:
+                return response.json({
+                    '_success': False,
+                    'message': 'Required param(s): user_id'
+                })
+
+            await db.fetchrow(
+                '''
+                UPDATE public.lessons
+                SET subscribers = array_remove(COALESCE(subscribers, ARRAY[]::integer[]), $2)
+                WHERE id = $1 AND $2 = ALL (subscribers)
+                RETURNING *
+                ''',
+                lesson_id,
+                user['id'],
+            )
 
         return response.json({
             '_success': True
