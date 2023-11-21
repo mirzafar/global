@@ -1,6 +1,7 @@
 from sanic import Blueprint
 
 from admin.api.categories import category_bp
+from admin.api.chats import chats_bp
 from admin.api.lessons import lessons_bp
 from admin.api.main import MainView
 from admin.api.roles import role_bp
@@ -18,5 +19,6 @@ api_group = Blueprint.group(
     users_bp,
     lessons_bp,
     testing_bp,
+    chats_bp,
     url_prefix='/api'
 )

@@ -228,6 +228,9 @@
                         {% if _user and 'my_lessons' in (_user.permissions or []) %}
                         <li><a href="/api/lessons/me/template/">Мои уроки</a></li>
                         {% endif %}
+                        {% if _user and 'chats' in (_user.permissions or []) %}
+                        <li><a href="/api/chats/template/">Чат</a></li>
+                        {% endif %}
                     </ul>
                 </li>
             </ul>
