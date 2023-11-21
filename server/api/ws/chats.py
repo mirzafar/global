@@ -1,15 +1,26 @@
 import ujson
 from sanic import Request, Websocket
 
+from utils.lists import ListUtils
 from utils.strs import StrUtils
 
 rooms = dict()
 
 
+def get_chat_id(chat_keys) -> str:
+    try:
+        user_id, recipient_id = chat_keys
+        return f'{user_id}:{recipient_id}' if user_id > recipient_id else f'{recipient_id}:{user_id}'
+
+    except (Exception,):
+        return str()
+
+
 async def chat_messages(request: Request, ws: Websocket):
     while True:
         data = ujson.loads(await ws.recv())
-        chat_id = StrUtils.to_str(data.get('chat_id'))
+        chat_keys = ListUtils.to_list_of_strs(data.get('chat_keys'))
+        chat_id = get_chat_id(chat_keys)
         if not chat_id:
             continue
 

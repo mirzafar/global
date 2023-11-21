@@ -111,12 +111,6 @@
             addActiveChatHeader(user);
             addActiveChatFooter(user);
             addActiveChatBody(user);
-            setInterval(function () {
-                addActiveChatBody(user);
-
-            }, 10000);
-
-
         })
     }
 
@@ -137,7 +131,7 @@
                     $.each(d['users'], function (index, user) {
                         if (d['user'] && d['user']['id'] === user.id) {
 
-                        }else {
+                        } else {
                             showUser(user);
                         }
                     });
@@ -226,6 +220,19 @@
                 if (d['_success'] === true) {
                     element.val('')
                     showMessage(d)
+
+                    console.log('click')
+                    if (conn) {
+                        var e = JSON.stringify({
+                            action: 'message',
+                            chat_keys: [data.recipient_id, d.user_id],
+                            body: d.body,
+                        })
+                        console.log('press')
+                        conn.send(e)
+                    }
+
+
                 } else {
                     alertShow('error', d['message']);
                 }
@@ -268,6 +275,8 @@
         }
     }
 
+    let conn = null
+
     function addActiveChatBody(user) {
         $('#activeChatBody').show();
         $('#activeChatBody').empty();
@@ -291,7 +300,30 @@
                     $.each(d['messages'], function (index, message) {
                         showMessage(message);
                     });
-                    $('#activeChatBody').scrollTop(100000000000000000)
+                    $('#activeChatBody').scrollTop(100000000000000000);
+
+                    if (conn) {
+                        conn.close()
+                        conn = null
+                    }
+
+                    conn = new WebSocket('ws://localhost:8129/ws/chats/');
+                    conn.onopen = function () {
+                        console.log('open')
+                        var e = JSON.stringify({
+                            action: 'open',
+                            chat_keys: [user.id, d.user.id]
+                        })
+                        conn.send(e)
+                    };
+
+                    conn.onmessage = function (event) {
+                        console.log('onmessage')
+                        let data = $.parseJSON(event.data);
+                        console.log(data)
+                        showMessage(data);
+                    }
+
                 } else {
                     alertShow('error', d['message']);
                 }

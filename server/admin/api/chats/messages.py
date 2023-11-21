@@ -73,6 +73,7 @@ class ChatsMessagesAPIView(BaseAPIView):
         return response.json({
             '_success': True,
             'messages': messages,
+            'user': dict(user),
         }, dumps=encoder.encode)
 
     async def save_message(self, chat_id, body, user_id):
