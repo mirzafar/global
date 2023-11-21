@@ -13,7 +13,6 @@ from utils.strs import StrUtils
 class ChatsMessagesAPIView(BaseAPIView):
 
     async def get(self, request, user):
-        print(request.args)
         chat_id = StrUtils.to_str(request.args.get('chat_id'))
         recipient_id = IntUtils.to_int(request.args.get('recipient_id'))
         if chat_id:
@@ -33,15 +32,16 @@ class ChatsMessagesAPIView(BaseAPIView):
                 ]
 
             })
-            if not chat:
-                return response.json({
-                    '_success': False,
-                    'message': 'Required param(s): chat_id'
-                })
+            if chat:
+                filter_obj = {
+                    'chat_id': str(chat['_id'])
+                }
+            else:
+                chat = await mongo.chats.insert_one({'user_ids': [recipient_id, user['id']]})
 
-            filter_obj = {
-                'chat_id': str(chat['_id'])
-            }
+                filter_obj = {
+                    'chat_id': str(chat.inserted_id)
+                }
 
         else:
             return response.json({
@@ -49,24 +49,26 @@ class ChatsMessagesAPIView(BaseAPIView):
                 'message': 'Required param(s): chat_id'
             })
 
-        pipeline = [
-            {
-                '$addFields': {
-                    'is_me': {
-                        '$cond': {
-                            'if': {'$eq': ['$user_id', user['id']]},
-                            'then': True,
-                            'else': False
+        messages = []
+        if filter_obj:
+            pipeline = [
+                {
+                    '$addFields': {
+                        'is_me': {
+                            '$cond': {
+                                'if': {'$eq': ['$user_id', user['id']]},
+                                'then': True,
+                                'else': False
+                            }
                         }
                     }
+                },
+                {
+                    '$match': filter_obj
                 }
-            },
-            {
-                '$match': filter_obj
-            }
-        ]
+            ]
 
-        messages = await mongo.messages.aggregate(pipeline).to_list(length=None) or []
+            messages = await mongo.messages.aggregate(pipeline).to_list(length=None) or []
 
         return response.json({
             '_success': True,
@@ -110,11 +112,20 @@ class ChatsMessagesAPIView(BaseAPIView):
                     'message': 'Required param(s): recipient_id'
                 })
 
-            chat = await mongo.chats.find_one_and_update({'user_ids': [user['id'], recipient_id]}, {'$set': {
-                'user_ids': [user['id'], recipient_id],
-                'updated_at': datetime.now(),
-                'last_message': body
-            }}, upsert=True, return_document=True)
+            chat = await mongo.chats.find_one_and_update(
+                {'$or': [
+                    {
+                        'user_ids': [user['id'], recipient_id]
+                    },
+                    {
+                        'user_ids': [recipient_id, user['id']]
+                    }
+                ]},
+                {'$set': {
+                    'user_ids': [user['id'], recipient_id],
+                    'updated_at': datetime.now(),
+                    'last_message': body
+                }}, upsert=True, return_document=True)
 
             return response.json(await self.save_message(chat['_id'], body, user['id']), dumps=encoder.encode)
 

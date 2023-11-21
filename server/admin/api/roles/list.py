@@ -24,9 +24,18 @@ class RolesView(BaseAPIView):
             '''
         ) or 0
 
+        permissions = ListUtils.to_list_of_dicts(await db.fetch(
+            '''
+            SELECT *
+            FROM public.permissions
+            WHERE status >= 0
+            '''
+        ))
+
         self.context['data'] = {
             'roles': roles,
-            'total': total
+            'total': total,
+            'permissions': permissions or [],
         }
 
         return self.render_template(request, user)

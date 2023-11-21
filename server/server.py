@@ -7,6 +7,7 @@ from admin import admin
 from admin.api import api_group, MainView
 from api.core.collection import CollectionView
 from api.core.upload import UploadView
+from api.ws.chats import chat_messages
 from core.auth import auth
 from core.cache import cache
 from core.db import mongo, db
@@ -53,6 +54,7 @@ app.blueprint([
 app.add_route(CollectionView.as_view(), '/collection/<collection_name>/<action>/', name='collection.action')
 app.add_route(UploadView.as_view(), '/upload/', name='upload')
 app.add_route(MainView.as_view(), '/', name='index')
+app.add_websocket_route(chat_messages, '/ws/chats/')
 
 app.static('/static', os.path.join(settings.get('file_path'), 'static'))
 

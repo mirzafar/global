@@ -1,11 +1,10 @@
 {% extends 'admin/base.html' %}
 {% block namePage %}
-Редактирование
-{% endblock %}
-{% block container %}
 <button type="button" id="back_url" class="btn btn-page"><span class="btn-icon-start text-info"><i
         class="fa fa-left-long color-info"></i></span>Назад
-</button>
+</button>Редактирование
+{% endblock %}
+{% block container %}
 <input type="hidden" id="user_id" value="{{lesson.id}}">
 <div class="row">
     <div class="col-xl-9 col-lg-8">

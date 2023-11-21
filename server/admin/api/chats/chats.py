@@ -30,7 +30,7 @@ class ChatsAPIView(BaseAPIView):
             ]
         }
 
-        chats = await mongo.chats.find(filter_obj).to_list(length=None)
+        chats = await mongo.chats.find(filter_obj, sort=[('updated_at', -1)]).to_list(length=None)
 
         data = []
         for chat in chats:

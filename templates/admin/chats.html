@@ -42,41 +42,7 @@
 
                         </div>
                         <div class="chat-box-area style-2 dz-scroll" id="activeChatBody">
-                            <div class="media justify-content-end align-items-end ms-auto">
-                                <div class="message-sent w-auto">
 
-                                    <p>Even the all-powerful Pointing has no control about the blind texts it is an<br>
-                                        almost unorthographic life One day however a small line of blind text by the
-                                        <br>
-                                        name of Lorem Ipsum decided to leave for the far World of Grammar. Aenean <br>
-                                        vulputate eleifend tellus. Aenean leo ligula.</p>
-                                    <span class="fs-12">9.30 AM</span>
-                                </div>
-                            </div>
-                            <div class="media">
-                                <div class="message-received w-auto">
-                                    <div class="d-flex">
-                                        <img src="images/contacts/pic2.jpg" class="avatar rounded-circle" alt="">
-                                        <div class="ms-1 text">
-                                            <p class="mb-1">Good morning</p>
-                                            <p class="mb-1">Can you arrange schedule for next meeting?</p>
-                                            <span>12:45 PM</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="media justify-content-end align-items-end ms-auto">
-                                <div class="message-sent w-auto">
-                                    <p class="mb-1">Very Good morning</p>
-                                    <p class="mb-1">Okay, I’ll arrange it soon. i noftify you when</p>
-                                    <p class="mb-1">Very Good morning</p>
-                                    <p>Okay, I’ll arrange it soon. i noftify you when it’s done<br>
-                                        +91-235 2574 2566<br>
-                                        kk Sharma<br>
-                                        pan card eeer2063i</p>
-                                    <span class="fs-12">9.30 AM</span>
-                                </div>
-                            </div>
                         </div>
                         <div class="message-send style-2" id="activeChatFooter">
 
@@ -97,6 +63,10 @@
     getChats(paramUser);
 
     clearChat();
+
+    setInterval(function () {
+        getChats(paramUser);
+    }, 10000);
 
     function clearChat() {
         $('#activeChatFooter').hide();
@@ -141,6 +111,12 @@
             addActiveChatHeader(user);
             addActiveChatFooter(user);
             addActiveChatBody(user);
+            setInterval(function () {
+                addActiveChatBody(user);
+
+            }, 10000);
+
+
         })
     }
 
@@ -159,7 +135,11 @@
                 if (d['_success'] === true) {
                     clearUsers();
                     $.each(d['users'], function (index, user) {
-                        showUser(user);
+                        if (d['user'] && d['user']['id'] === user.id) {
+
+                        }else {
+                            showUser(user);
+                        }
                     });
 
                 } else {
@@ -188,8 +168,12 @@
             success: function (d) {
                 if (d['_success'] === true) {
                     $.each(d['chats'], function (index, user) {
-                        console.log(user)
-                        showUser(user);
+                        if (d['user'] && d['user']['id'] === user.id) {
+
+                        } else {
+                            showUser(user);
+
+                        }
                     });
 
                 } else {
@@ -241,7 +225,6 @@
             success: function (d) {
                 if (d['_success'] === true) {
                     element.val('')
-                    console.log(d)
                     showMessage(d)
                 } else {
                     alertShow('error', d['message']);
@@ -308,6 +291,7 @@
                     $.each(d['messages'], function (index, message) {
                         showMessage(message);
                     });
+                    $('#activeChatBody').scrollTop(100000000000000000)
                 } else {
                     alertShow('error', d['message']);
                 }
@@ -345,6 +329,18 @@
             })
         )
         $('#activeChatFooter').append(buttonSend)
+
+        $(elementArea).keyup(function (event) {
+            if (event.key === 'Enter') {
+                if (elementArea.val()) {
+                    sendMessage({
+                        recipient_id: user.id,
+                        body: elementArea.val(),
+                        action: 'create_chat_and_send',
+                    }, elementArea);
+                }
+            }
+        });
 
         $(buttonSend).on('click', function () {
             if (elementArea.val()) {

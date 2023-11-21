@@ -42,13 +42,13 @@ class Auth:
                     u.last_name,
                     u.first_name,
                     u.middle_name,
-                    u.permissions,
                     u.role_id,
                     u.status,
                     u.password,
                     u.username,
                     r.title AS role_title,
                     r.key AS role_key,
+                    r.permissions AS permissions,
                     u.photo
                 FROM public.users u
                 LEFT JOIN public.roles r ON u.role_id = r.id

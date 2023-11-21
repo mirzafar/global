@@ -26,6 +26,7 @@
                                         <tr>
                                             <th><strong>Название</strong></th>
                                             <th><strong>Описание</strong></th>
+                                            <th><strong>Разрешении</strong></th>
                                             <th><strong>Статус</strong></th>
                                             <th><strong></strong></th>
                                         </tr>
@@ -34,6 +35,13 @@
                                         <tr data-id="new" class="js-cont odd" id="new" style="display: none">
                                             <td><input class="form-control" type="text" name="title"></td>
                                             <td><input class="form-control" type="text" name="description"></td>
+                                            <td>
+                                                <select name="permissions" multiple>
+                                                    {% for permission in data.permissions %}
+                                                    <option value="{{permission.key}}">{{permission.title}}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
                                             <td>
                                                 <a class="btn btn-pill btn-success btn-air-success btn-air-success js-add-new">
                                                     Сохранить
@@ -53,6 +61,25 @@
                                                 <input style="display: none" type="text" class="form-control"
                                                        name="description"
                                                        value="{{ role.description }}">
+                                            </td>
+
+                                            <td>
+                                                <span>
+                                                    {% for permission in (role.permissions or []) %}
+                                                    {{permission}}<br/>
+                                                    {% endfor %}
+                                                </span>
+                                                <div id="selectTable" style="display: none">
+                                                    <select name="permissions" multiple>
+                                                        {% for permission in data.permissions %}
+                                                        <option {% if permission.key in (role.permissions or []) %}
+                                                                selected {% endif %} value="{{permission.key}}">
+                                                            {{permission.title}}
+                                                        </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+
                                             </td>
 
                                             <td>
@@ -159,6 +186,7 @@
         $(this).parents('tr').find('span').hide();
         $(this).parents('tr').find('input').show();
         $(this).parents('tr').find('select').show();
+        $(this).parents('tr').find('#selectTable').show();
         $(this).parents('tr').find('.js-update').show();
         $(this).parents('tr').find('.js-cancel').show();
         $(this).parents('tr').find('.js-remove').hide();

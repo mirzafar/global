@@ -54,6 +54,7 @@ class UsersListView(BaseAPIView):
             '_success': True,
             'users': users,
             'pager': pager.dict(),
+            'user': dict(user),
         }
 
         return response.json(self.context, dumps=encoder.encode)

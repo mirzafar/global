@@ -47,21 +47,6 @@
                             </div>
                         </div>
                         <div class="col-sm-6 m-b30">
-                            <label class="form-label">Разрешении</label>
-                            <div class="dropdown bootstrap-select default-select form-control">
-                                <select class="default-select form-control" name="permissions" id="validationCustom07"
-                                        multiple>
-                                    {% for permission in data.permissions %}
-                                    <option {% if permission.key in (data.user.permissions or []) %}selected{% endif %}
-                                            value="{{permission.key}}">
-                                        {{permission.title}}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-
-                            </div>
-                        </div>
-                        <div class="col-sm-6 m-b30">
                             <label class="form-label">Дата рождения</label>
                             <input type="date" class="form-control" name="birthday"
                                    value="{% if data.user.birthday %}{{data.user.birthday.strftime('%Y-%m-%d')}}{% endif %}">

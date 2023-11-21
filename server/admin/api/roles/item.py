@@ -3,6 +3,7 @@ from sanic import response
 from core.db import db
 from core.handlers import BaseAPIView
 from utils.ints import IntUtils
+from utils.lists import ListUtils
 from utils.strs import StrUtils
 
 
@@ -27,16 +28,18 @@ class RolesItemView(BaseAPIView):
     async def post(self, request, user, role_id):
         title = StrUtils.to_str(request.json.get('title'))
         description = StrUtils.to_str(request.json.get('description'))
+        permissions = ListUtils.to_list_of_strs(request.json.get('permissions'))
 
         if role_id == 'new':
             data = await db.fetchrow(
                 '''
-                INSERT INTO public.roles(title, description)
-                VALUES ($1, $2)
+                INSERT INTO public.roles(title, description, permissions)
+                VALUES ($1, $2, $3)
                 RETURNING *
                 ''',
                 title,
                 description,
+                permissions,
             )
 
             if data:
@@ -61,13 +64,14 @@ class RolesItemView(BaseAPIView):
         data = await db.fetchrow(
             '''
             UPDATE public.roles
-            SET title = $2, description = $3
+            SET title = $2, description = $3, permissions = $4
             WHERE id = $1
             RETURNING *
             ''',
             role_id,
             title,
             description,
+            permissions,
         )
 
         if not data:

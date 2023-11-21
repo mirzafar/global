@@ -36,7 +36,6 @@ class LoginAdminView(TemplateHTTPView):
                 u.last_name,
                 u.first_name,
                 u.middle_name,
-                u.permissions,
                 u.role_id,
                 u.status,
                 u.password,
