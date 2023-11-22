@@ -119,7 +119,7 @@ class TestingsCompleteAPIView(BaseAPIView):
                     user['id'],
                 )
 
-                if count_result and lesson.get('testing_count') < count_result:
+                if count_result and (lesson.get('testing_count') or 0) <= count_result:
                     return response.json({
                         '_success': False,
                         'is_info': True,

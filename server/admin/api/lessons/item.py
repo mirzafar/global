@@ -175,6 +175,48 @@ class LessonsItemView(BaseAPIView):
                 'message': 'Required param(s): title'
             })
 
+        if testing_state == 1:
+            questions = await db.fetchrow(
+                '''
+                SELECT
+                    array_agg(id) AS question_ids,
+                    count(id) FILTER ( WHERE current_answer_id IS NULL ) AS count
+                FROM testings.questions
+                WHERE lesson_id = $1 AND status >= 0
+                ''',
+                lesson_id
+            )
+            question_ids = questions['question_ids']
+            question_count = questions['count']
+
+            if question_ids:
+                ids = await db.fetchval(
+                    '''
+                    SELECT array_agg(DISTINCT question_id)
+                    FROM testings.answers
+                    WHERE status >= 0 AND question_id = ANY ($1)
+                    ''',
+                    question_ids
+                )
+                for x in question_ids:
+                    if x not in list(ids or []):
+                        return response.json({
+                            '_success': False,
+                            'message': 'Ответы на вопросы не найден'
+                        })
+
+            else:
+                return response.json({
+                    '_success': False,
+                    'message': 'Вопросы для тестирования не найдены'
+                })
+
+            if question_count:
+                return response.json({
+                    '_success': False,
+                    'message': 'У вопроса отсутствует правильный ответ'
+                })
+
         if discount and 1 < discount < 100:
             price = price * (100 - discount) / 100
 

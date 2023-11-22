@@ -14,7 +14,7 @@ class LessonsView(BaseAPIView):
 
     async def get(self, request, user):
         page = request.args.get('page', 1)
-        limit = request.args.get('limit', 3)
+        limit = request.args.get('limit', 10)
 
         pager = Pager()
         pager.set_page(page)

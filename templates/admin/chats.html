@@ -66,7 +66,7 @@
 
     setInterval(function () {
         getChats(paramUser);
-    }, 10000);
+    }, 20000);
 
     function clearChat() {
         $('#activeChatFooter').hide();
@@ -273,6 +273,8 @@
 
             $('#activeChatBody').append(elementDivMessage)
         }
+
+        scrollTopFunc();
     }
 
     let conn = null
@@ -300,12 +302,6 @@
                     $.each(d['messages'], function (index, message) {
                         showMessage(message);
                     });
-                    $('#activeChatBody').scrollTop(100000000000000000);
-
-                    if (conn) {
-                        conn.close()
-                        conn = null
-                    }
 
                     conn = new WebSocket('ws://localhost:8129/ws/chats/');
                     conn.onopen = function () {
@@ -334,6 +330,18 @@
         })
     }
 
+    function scrollTopFunc() {
+        console.log()
+        let h = $('#activeChatBody').scrollTop()
+        if (h) {
+            console.log('dasdas')
+            $('#activeChatBody').scrollTop(h * 1000);
+
+        } else {
+            $('#activeChatBody').scrollTop(10000000000000000000);
+        }
+    }
+
     function addActiveChatFooter(user) {
         $('#activeChatFooter').show();
         $('#activeChatFooter').empty();
@@ -341,7 +349,6 @@
         let elementMainDiv = $('<div>').addClass('input-group')
 
         let elementArea = $('<textarea>').attr({
-            row: 1,
             class: 'form-control',
         })
         elementMainDiv.append(elementArea)

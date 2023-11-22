@@ -1,14 +1,20 @@
 {% extends 'admin/base.html' %}
 {% block namePage %}
-Тестирование
-{% endblock %}
-{% block container %}
 <button type="button" id="back_url" class="btn btn-page"><span class="btn-icon-start text-info"><i
         class="fa fa-left-long color-info"></i></span>Назад
-</button>
+</button>Тестирование
+{% endblock %}
+{% block container %}
+
 <div class="row">
-    <div class="col-lg-6 col-md-8">
-        <div class="card" id="main"></div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body" id="questionBlog" style="display: none">
+                <div class="profile-blog" id="questionBlogDetails">
+                </div>
+            </div>
+            <div class="card" id="main"></div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -17,6 +23,10 @@
 <script>
     let curl_url = location.pathname.split('/');
     let lesson_id = curl_url[curl_url.length - 3];
+
+    function hideQuestionBlog() {
+        $('#questionBlog').hide()
+    }
 
     function showStartButton() {
         let newElementDivCartBody = $('<div>').addClass('card-body');
@@ -57,14 +67,60 @@
         $('#main').append(newElementDivCartBody);
     }
 
+    function addQuestionDetails(question) {
+        let self = $('#questionBlogDetails')
+        self.empty();
+        $('#questionBlog').show()
+
+        self.append(
+            $('<h5>').addClass('text-primary d-inline').text(question.title)
+        )
+
+        if (question.photo) {
+            self.append(
+                $('<img>').attr({
+                    class: 'img-fluid mt-4 mb-4 w-100 rounded',
+                    src: '/static/uploads/' + question.photo
+                })
+            )
+        }
+
+        if (question.audio) {
+            self.append(
+                $('<audio>').attr({
+                    class: 'img-fluid mt-4 mb-4 w-100 rounded',
+                    src: '/static/uploads/' + question.audio
+                })
+            )
+        }
+
+        if (question.video_link) {
+            self.append(
+                $('<h4>').append(
+                    $('<a>').attr({
+                        class: 'text-black',
+                        href: question.video_link
+                    }).text('Перейдите по ссылке для просмотра видео')
+                )
+            )
+        }
+
+        if (question.description) {
+            self.append(
+                $('<p>').attr({
+                    class: 'mb-0',
+                }).text(question.description)
+            )
+        }
+
+    }
+
     function showQuestion(question, isLast) {
         $('#back_url').hide()
+
         $('#main').empty()
-        let newElementDivCartHeader = $('<div>').addClass('card-header');
-        newElementDivCartHeader.append(
-            $('<h4>').addClass('card-title').text(question.title)
-        )
-        $('#main').append(newElementDivCartHeader);
+
+        addQuestionDetails(question);
 
         let newElementDivCartBody = $('<div>').addClass('card-body');
         let newElementBasicForm = $('<div>').addClass('basic-form');
@@ -184,6 +240,7 @@
 
     function endSurvey(result) {
         $('#main').empty();
+        $('#questionBlog').hide();
         alertShow('success');
         location.href = '/api/'
     }
