@@ -3,6 +3,7 @@
 Чат
 {% endblock %}
 {% block container %}
+<input type="hidden" id="currentUser" value="{{_user.id}}">
 <div class="row gx-0">
     <div class="col-xl-12">
         <div class="card overflow-hidden">
@@ -61,12 +62,37 @@
     let paramUser = {}
 
     getChats(paramUser);
+    alert
 
     clearChat();
 
     setInterval(function () {
         getChats(paramUser);
     }, 20000);
+
+    let activeChatUserId = null
+    const activeUserId = parseInt($('#currentUser').val())
+
+    const conn = new WebSocket('ws://localhost:8129/ws/chats/');
+    conn.onopen = function () {
+        console.log('open')
+        var e = JSON.stringify({
+            action: 'open',
+            user_id: activeUserId
+        })
+        conn.send(e)
+    };
+
+    conn.onmessage = function (event) {
+        console.log('onmessage')
+        let data = $.parseJSON(event.data);
+        console.log(data)
+        console.log(activeChatUserId)
+        if (activeChatUserId === data.userId) {
+            console.log('show')
+            showMessage(data);
+        }
+    }
 
     function clearChat() {
         $('#activeChatFooter').hide();
@@ -168,6 +194,7 @@
                             showUser(user);
 
                         }
+
                     });
 
                 } else {
@@ -222,15 +249,14 @@
                     showMessage(d)
 
                     console.log('click')
-                    if (conn) {
-                        var e = JSON.stringify({
-                            action: 'message',
-                            chat_keys: [data.recipient_id, d.user_id],
-                            body: d.body,
-                        })
-                        console.log('press')
-                        conn.send(e)
-                    }
+                    var e = JSON.stringify({
+                        action: 'message',
+                        recipient_id: data.recipient_id,
+                        body: d.body,
+                        userId: d.user_id,
+                    })
+                    console.log('press')
+                    conn.send(e)
 
 
                 } else {
@@ -277,8 +303,6 @@
         scrollTopFunc();
     }
 
-    let conn = null
-
     function addActiveChatBody(user) {
         $('#activeChatBody').show();
         $('#activeChatBody').empty();
@@ -287,6 +311,8 @@
             chat_id: user.chat_id,
             recipient_id: user.id,
         });
+
+        activeChatUserId = user.id;
 
         let apiUrl = '/api/chats/messages/?';
         if (paramsString) {
@@ -303,23 +329,6 @@
                         showMessage(message);
                     });
 
-                    conn = new WebSocket('ws://localhost:8129/ws/chats/');
-                    conn.onopen = function () {
-                        console.log('open')
-                        var e = JSON.stringify({
-                            action: 'open',
-                            chat_keys: [user.id, d.user.id]
-                        })
-                        conn.send(e)
-                    };
-
-                    conn.onmessage = function (event) {
-                        console.log('onmessage')
-                        let data = $.parseJSON(event.data);
-                        console.log(data)
-                        showMessage(data);
-                    }
-
                 } else {
                     alertShow('error', d['message']);
                 }
@@ -334,7 +343,6 @@
         console.log()
         let h = $('#activeChatBody').scrollTop()
         if (h) {
-            console.log('dasdas')
             $('#activeChatBody').scrollTop(h * 1000);
 
         } else {
