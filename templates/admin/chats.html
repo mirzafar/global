@@ -62,7 +62,6 @@
     let paramUser = {}
 
     getChats(paramUser);
-    alert
 
     clearChat();
 
@@ -73,7 +72,7 @@
     let activeChatUserId = null
     const activeUserId = parseInt($('#currentUser').val())
 
-    const conn = new WebSocket('ws://localhost:8129/ws/chats/');
+    const conn = new WebSocket('ws://'+ location.hostname +':8129/ws/chats/');
     conn.onopen = function () {
         console.log('open')
         var e = JSON.stringify({
@@ -379,7 +378,7 @@
 
         $(elementArea).keyup(function (event) {
             if (event.key === 'Enter') {
-                if (elementArea.val()) {
+                if (elementArea.val().trim()) {
                     sendMessage({
                         recipient_id: user.id,
                         body: elementArea.val(),

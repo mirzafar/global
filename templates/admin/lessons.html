@@ -63,11 +63,12 @@
     let urlParams = {}
     let currentUser = {}
 
-    getListItems();
+    getListItems(urlParams);
 
     function clearTable() {
         $('#list_items tr').remove()
         $('#list_pagination li').remove()
+        $('#button_add').empty()
         currentUser = {}
     }
 
@@ -98,6 +99,7 @@
                 if (d['_success'] === true) {
                     clearTable();
                     showButtonAdd(d['user']);
+
                     $.each(d['lessons'], function (index, item) {
                         showDataItem(item);
                     });
@@ -134,16 +136,28 @@
         newElementTdActionsDivAInfo.append(newElementTdActionsDivAInfoI)
 
 
-        let newElementShowResultSubscribe = $('<a>').addClass('btn btn-page shadow btn-xs sharp me-1');
-        let subscribe_icon = 'fa fa-plus'
         if (item.is_subscribe === true) {
-            subscribe_icon = 'fa fa-check'
+            let newElementShowResultSubscribe = $('<a>').addClass('btn btn-page shadow btn-xs sharp me-1');
+            let newElementShowResultSubscribeI = $('<i>').addClass('fa fa-check');
+            newElementShowResultSubscribe.append(newElementShowResultSubscribeI);
+            newElementTdActionsDiv.append(newElementShowResultSubscribe);
+
+            $(newElementShowResultSubscribe).on('click', function () {
+                unsubscribeLesson(item.id, newElementShowResultSubscribeI);
+            })
+        } else {
+            let newElementShowResultSubscribe = $('<a>').addClass('btn btn-page shadow btn-xs sharp me-1');
+            let newElementShowResultSubscribeI = $('<i>').addClass('fa fa-plus');
+            newElementShowResultSubscribe.append(newElementShowResultSubscribeI);
+            newElementTdActionsDiv.append(newElementShowResultSubscribe);
+
+            $(newElementShowResultSubscribe).on('click', function () {
+                subscribeLesson(item.id, newElementShowResultSubscribeI);
+            })
         }
-        let newElementShowResultSubscribeI = $('<i>').addClass(subscribe_icon);
-        newElementShowResultSubscribe.append(newElementShowResultSubscribeI)
+
 
         newElementTdActionsDiv.append(newElementTdActionsDivAInfo)
-        newElementTdActionsDiv.append(newElementShowResultSubscribe)
 
         newElementTdActions.append(newElementTdActionsDiv)
         newElementTdActions.append(newElementTdActions)
@@ -194,10 +208,6 @@
                 location.href = '/api/testings/complete/' + item.id.toString() + '/template/'
             })
         }
-        $(newElementShowResultSubscribe).on('click', function () {
-            subscribeLesson(item.id, newElementShowResultSubscribeI);
-        })
-
         $("#list_items").append(newElementTr);
     }
 
@@ -211,8 +221,29 @@
             }),
             success: function (d) {
                 if (d['_success'] === true) {
-                    element.removeClass();
-                    element.addClass('fa fa-check');
+                    getListItems()
+
+                } else {
+                    alertShow('error', d['message']);
+                }
+            },
+            error: function (d) {
+                alertShow('waring');
+            }
+        })
+    }
+
+    function unsubscribeLesson(lesson_id, element) {
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: '/api/lessons/' + lesson_id.toString(),
+            data: JSON.stringify({
+                action: 'unsubscribe'
+            }),
+            success: function (d) {
+                if (d['_success'] === true) {
+                    getListItems()
 
                 } else {
                     alertShow('error', d['message']);
