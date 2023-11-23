@@ -176,45 +176,42 @@ class LessonsItemView(BaseAPIView):
             })
 
         if testing_state == 1:
-            questions = await db.fetchrow(
+            question_ids = await db.fetchval(
                 '''
-                SELECT
-                    array_agg(id) AS question_ids,
-                    count(id) FILTER ( WHERE current_answer_id IS NULL ) AS count
+                SELECT array_agg(id) AS question_ids
                 FROM testings.questions
                 WHERE lesson_id = $1 AND status >= 0
                 ''',
                 lesson_id
             )
-            question_ids = questions['question_ids']
-            question_count = questions['count']
 
             if question_ids:
-                ids = await db.fetchval(
+                answers = await db.fetchrow(
                     '''
-                    SELECT array_agg(DISTINCT question_id)
+                    SELECT
+                        array_agg(DISTINCT question_id) AS count_question,
+                        array_agg(id) FILTER ( WHERE is_currect = 1 ) AS count_answers
                     FROM testings.answers
                     WHERE status >= 0 AND question_id = ANY ($1)
                     ''',
                     question_ids
                 )
-                for x in question_ids:
-                    if x not in list(ids or []):
-                        return response.json({
-                            '_success': False,
-                            'message': 'Ответы на вопросы не найден'
-                        })
 
+                if not set(answers['count_question'] or []) == set(question_ids):
+                    return response.json({
+                        '_success': False,
+                        'message': 'Ответы на вопросы не найден'
+                    })
+
+                if not len(answers['count_answers'] or 0) == len(question_ids):
+                    return response.json({
+                        '_success': False,
+                        'message': 'У вопроса отсутствует правильный ответ'
+                    })
             else:
                 return response.json({
                     '_success': False,
                     'message': 'Вопросы для тестирования не найдены'
-                })
-
-            if question_count:
-                return response.json({
-                    '_success': False,
-                    'message': 'У вопроса отсутствует правильный ответ'
                 })
 
         if discount and 1 < discount < 100:

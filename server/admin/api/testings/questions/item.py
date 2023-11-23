@@ -3,7 +3,6 @@ from sanic import response
 from core.db import db
 from core.handlers import BaseAPIView
 from utils.ints import IntUtils
-from utils.lists import ListUtils
 from utils.strs import StrUtils
 
 
@@ -14,6 +13,27 @@ class TestingsQuestionsItemAPIView(BaseAPIView):
             return response.json({
                 '_success': False,
                 'message': 'Required param(s): question_id'
+            })
+
+        access = await db.fetchval(
+            '''
+            SELECT l.testing_state 
+            FROM testings.questions q
+            LEFT JOIN public.lessons l ON q.lesson_id = l.id
+            WHERE q.id = $1
+            ''',
+            question_id
+        )
+        if access is None:
+            return response.json({
+                '_success': False,
+                'message': 'Урок не найден'
+            })
+
+        if access == 1:
+            return response.json({
+                '_success': False,
+                'message': 'Доступ отказан. Урок уже активирован'
             })
 
         title = StrUtils.to_str(request.json.get('title'))

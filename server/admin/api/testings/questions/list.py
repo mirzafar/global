@@ -58,6 +58,19 @@ class TestingsQuestionsAPIView(BaseAPIView):
                 'message': 'Required param(s): lesson_id'
             })
 
+        access = await db.fetchval('SELECT testing_state FROM public.lessons WHERE id = $1', lesson_id)
+        if access is None:
+            return response.json({
+                '_success': False,
+                'message': 'Урок не найден'
+            })
+
+        if access == 1:
+            return response.json({
+                '_success': False,
+                'message': 'Доступ отказан. Урок уже активирован'
+            })
+
         title = StrUtils.to_str(request.json.get('title'))
         description = StrUtils.to_str(request.json.get('description'))
         photo = StrUtils.to_str(request.json.get('photo'))

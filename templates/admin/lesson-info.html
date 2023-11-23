@@ -1,5 +1,8 @@
 {% extends 'admin/base.html' %}
 {% block namePage %}
+<button type="button" id="back_url" class="btn btn-page"><span class="btn-icon-start text-info"><i
+        class="fa fa-left-long color-info"></i></span>Назад
+</button>
 Инфо о уроке
 {% endblock %}
 {% block container %}
@@ -41,10 +44,10 @@
                                 <p class="text-content">{{lesson.description}}</p>
                                 <div class="d-flex align-items-end flex-wrap mt-4">
                                     {% if lesson.is_subscribe %}
-                                    <button onclick="unsubscribeLesson({{lesson.id}})" type="button" class="btn btn-primary"><i class="fa fa-check"></i> Подписать
+                                    <button onclick="unsubscribeLesson({{lesson.id}})" type="button" class="btn btn-primary"><i class="fa fa-check"></i> Удалить
                                     </button>
                                     {% else %}
-                                    <button type="button" onclick="subscribeLesson({{lesson.id}})" class="btn btn-primary"><i class="fa fa-plus"></i> Подписать
+                                    <button type="button" onclick="subscribeLesson({{lesson.id}})" class="btn btn-primary"><i class="fa fa-plus"></i> Добавить
                                     </button>
                                     {% endif %}
                                 </div>

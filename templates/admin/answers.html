@@ -1,12 +1,11 @@
 {% extends 'admin/base.html' %}
 {% block namePage %}
-<button type="button" id="back_url" class="btn btn-page"><span class="btn-icon-start text-info"><i
+<button type="button" onclick="backUrl()" class="btn btn-page"><span class="btn-icon-start text-info"><i
         class="fa fa-left-long color-info"></i></span>Назад
 </button>
 Ответы
 {% endblock %}
 {% block container %}
-
 <div class="element-area">
     <div class="demo-view">
         <div class="container-fluid pt-0 ps-0 pe-lg-4 pe-0">
@@ -45,11 +44,16 @@
 {% block js %}
 <script>
     let curl_url = location.pathname.split('/');
+    let lesson_id = null;
     let question_id = curl_url[curl_url.length - 1] || curl_url[curl_url.length - 2];
 
-    $('#back_url').on('click', function () {
-        window.history.back();
-    })
+    function backUrl() {
+        if (lesson_id) {
+            location.href = '/api/testings/questions/' + lesson_id.toString()
+        } else {
+            window.history.back();
+        }
+    }
 
     function addEditAnswersDeleteButtons(Element, item) {
         let newSpan = $('<span>');
@@ -62,6 +66,27 @@
         newButtonDelete.append($('<i>').addClass('fa fa-trash'));
         newSpan.append(newButtonDelete);
 
+        let newCheckBox = $('<input>').addClass('form-check-input').css({
+            'background-color': '#3A9B94',
+            'border-color': '#3A9B94',
+            'font-size': '14px',
+            'font-weight': 600
+        });
+
+        if (item.is_currect === 1) {
+            newCheckBox.attr({
+                type: 'checkbox',
+                disabled: 'disabled',
+                checked: 'checked'
+            })
+        } else {
+            newCheckBox.attr({
+                type: 'checkbox',
+                disabled: 'disabled',
+            })
+        }
+        newSpan.append(newCheckBox);
+
         Element.append(newSpan);
 
         $(newButtonEdit).on("click", function () {
@@ -69,7 +94,7 @@
         });
 
         $(newButtonDelete).on("click", function () {
-            deleteQuestion(Element, item)
+            deleteQuestion(item)
         });
     }
 
@@ -99,8 +124,32 @@
         newButtonCancel.append($('<i>').addClass('fa fa-cancel'));
         element.append(newButtonCancel);
 
+        let newCheckBox = $('<input>').addClass('form-check-input')
+        if (item.is_currect === 1) {
+            newCheckBox.attr({
+                type: 'checkbox',
+                checked: 'checked'
+            })
+        } else {
+            newCheckBox.attr({
+                type: 'checkbox',
+            })
+        }
+        let item_is_currect = item.is_currect
+        newCheckBox.on('change', function () {
+            if (item_is_currect === 1) {
+                item_is_currect = 0
+            } else {
+                item_is_currect = 1
+            }
+        });
+        element.append(newCheckBox);
+
         newButtonSave.on('click', function () {
-            updateQuestion(element, item, {title: newInput.val()})
+            updateQuestion(item, {
+                title: newInput.val(),
+                is_currect: item_is_currect
+            })
         });
 
         newButtonCancel.on('click', function () {
@@ -109,30 +158,41 @@
         });
     }
 
-    $.ajax({
-        type: 'GET',
-        dataType: 'json',
-        url: '/api/testings/answers/' + question_id.toString() + '/list/',
-        success: function (d) {
-            if (d['_success'] === true) {
-                $.each(d['answers'], function (index, item) {
-                    showDataItem(item)
-                });
-            } else {
-                alertShow(d['message'], 'error');
+    getDataItems();
+
+    function getDataItems() {
+        $.ajax({
+            type: 'GET',
+            dataType: 'json',
+            url: '/api/testings/answers/' + question_id.toString() + '/list/',
+            success: function (d) {
+                if (d['_success'] === true) {
+                    $('#list_items').empty();
+
+                    if (!lesson_id) {
+                        lesson_id = d.lesson_id
+                    }
+
+                    $.each(d['answers'], function (index, item) {
+                        showDataItem(item)
+                    });
+                } else {
+                    alertShow(d['message'], 'error');
+                }
+            },
+            error: function (d) {
+                alertShow('waring');
             }
-        },
-        error: function (d) {
-            alertShow('waring');
-        }
-    })
+        })
+    }
+
 
     $('#add_question').click(function () {
         var newElementLi = $('<li>')
             .addClass('list-group-item d-flex justify-content-between align-items-center new-column-question js-question-item')
         ;
-        let newInput = $('<input>').attr('name', 'title').addClass('form-control').css('margin-right', '1%')
-        newElementLi.append(newInput);
+        let title = $('<input>').attr('name', 'title').addClass('form-control').css('margin-right', '1%')
+        newElementLi.append(title);
 
         var newButtonCheck = $('<a>').addClass('btn btn-success shadow btn-xs sharp me-1');
         newButtonCheck.append($('<i>').addClass('fa fa-check'));
@@ -142,51 +202,44 @@
         newButtonCancel.append($('<i>').addClass('fa fa-cancel'));
         newElementLi.append(newButtonCancel);
 
-        newButtonCheck.on('click', function () {
-            $.ajax({
-                type: 'POST',
-                dataType: 'json',
-                url: '/api/testings/answers/' + question_id.toString() + '/list/',
-                data: JSON.stringify({
-                    'title': newInput.val()
-                }),
-                success: function (d) {
-                    if (d['_success'] === true) {
-                        alertShow('success')
-                        let newElementLi = $('<li>')
-                            .text(d.answer.title)
-                            .addClass('list-group-item d-flex justify-content-between align-items-center js-question-item')
-
-                        addEditAnswersDeleteButtons(newElementLi, d.answer);
-                        $('.new-column-question').remove();
-                        $("#list_items").prepend(newElementLi);
-
-                    } else {
-                        alertShow('error', d['message']);
-                    }
-                },
-                error: function (d) {
-                    alertShow('waring');
-                }
-            });
-        });
-
         newButtonCancel.on('click', function () {
             $('.new-column-question').remove();
+        });
+
+        let newCheckBox = $('<input>').addClass('form-check-input').attr({
+            type: 'checkbox',
+        })
+
+        let item_is_currect = 0
+        newCheckBox.on('change', function () {
+            if (item_is_currect === 1) {
+                item_is_currect = 0
+            } else {
+                item_is_currect = 1
+            }
+        });
+        newElementLi.append(newCheckBox);
+
+        newButtonCheck.on('click', function () {
+            insertQuestion({
+                'title': title.val(),
+                'is_currect': item_is_currect
+            })
+
         });
 
         $("#list_items").prepend(newElementLi);
     });
 
-    function deleteQuestion(ElementLi, item) {
+    function deleteQuestion(item) {
         $.ajax({
             type: 'DELETE',
             dataType: 'json',
             url: '/api/testings/answers/' + item.id.toString(),
             success: function (d) {
                 if (d['_success'] === true) {
-                    alertShow('success')
-                    ElementLi.remove()
+                    alertShow('success');
+                    getDataItems();
                 } else {
                     alertShow('error', d['message'])
                 }
@@ -197,7 +250,27 @@
         });
     }
 
-    function updateQuestion(element, item, body) {
+    function insertQuestion(item) {
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: '/api/testings/answers/' + question_id.toString() + '/list/',
+            data: JSON.stringify(item),
+            success: function (d) {
+                if (d['_success'] === true) {
+                    alertShow('success')
+                    getDataItems();
+                } else {
+                    alertShow('error', d['message']);
+                }
+            },
+            error: function (d) {
+                alertShow('waring');
+            }
+        });
+    }
+
+    function updateQuestion(item, body) {
         $.ajax({
             type: 'POST',
             dataType: 'json',
@@ -205,10 +278,8 @@
             data: JSON.stringify(body),
             success: function (d) {
                 if (d['_success'] === true) {
-                    element.text(body.title);
-                    item.title = body.title
-                    addEditAnswersDeleteButtons(element, item)
-                    alertShow('success')
+                    alertShow('success');
+                    getDataItems();
                 } else {
                     alertShow('error', d['message'])
                 }

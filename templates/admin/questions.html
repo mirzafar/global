@@ -1,6 +1,6 @@
 {% extends 'admin/base.html' %}
 {% block namePage %}
-<button type="button" id="back_url" class="btn btn-page"><span class="btn-icon-start text-info"><i
+<button type="button" onclick="backUrl('/api/lessons/template/')" class="btn btn-page"><span class="btn-icon-start text-info"><i
         class="fa fa-left-long color-info"></i></span>Назад
 </button>Вопросы
 {% endblock %}
@@ -57,13 +57,6 @@
                                 <label class="form-label">Url Video</label>
                                 <input type="text" class="form-control" name="video_link">
                             </div>
-                            <div class="col-sm-6 m-b30">
-                                <label class="form-label">Правильный ответ</label>
-                                <select class="form-control" name="current_answer_id"
-                                        id="select_answers">
-
-                                </select>
-                            </div>
                             <div class="ol-sm-6 m-b30">
                                 <label class="form-label">Фото</label>
                                 <div class="col-sm-9" data-name="photo">
@@ -118,14 +111,45 @@
 {% block js %}
 <script src="/static/js/audioRecorder.js"></script>
 <script>
-    $('#new_item_column').hide();
-    $('#save_new_item').hide();
-    $('#update_new_item').hide();
-
+    let urlParams = {}
     let curl_url = location.pathname.split('/');
     let lesson_id = curl_url[curl_url.length - 1] || curl_url[curl_url.length - 2];
 
-    getListQuestions();
+    function backUrl(url) {
+        if (url) {
+            location.href = url
+        } else {
+            window.history.back();
+        }
+    }
+
+    function clearAll() {
+        $('#add_question').data('id', 'add').text('Создать')
+        $('#list_items').show();
+        $('#new_item_column').hide();
+    }
+
+    clearAll();
+
+    $('#add_question').on('click', function () {
+        if ($('#add_question').data('id') === 'add') {
+            $('#add_question').data('id', 'cancel').text('Отмена');
+
+            $('#list_items').hide();
+            $('#new_item_column').show();
+
+            clearAllInfo();
+
+            $('#save_new_item').show();
+            $('#update_new_item').hide();
+
+        } else {
+            $('#add_question').data('id', 'add').text('Создать');
+            getListQuestions(urlParams);
+        }
+    })
+
+    getListQuestions(urlParams);
 
     $('#photoInput, #audioInput').change(function () {
         var trigger_name = $(this).parents('.col-sm-9').data('name');
@@ -146,7 +170,6 @@
 
     $('#save_new_item').on('click', function () {
         var new_data = getValues('#new_item_column')
-        console.log(new_data)
         $.ajax({
             type: 'POST',
             dataType: 'json',
@@ -155,17 +178,7 @@
             success: function (d) {
                 if (d['_success'] === true) {
                     alertShow('success');
-                    showButtonAddCancel(d.questions);
-
-
-                    let newElementLi = $('<li>')
-                        .text(d.questions.title)
-                        .addClass('list-group-item d-flex justify-content-between align-items-center js-question-item')
-                        .attr("data-id", d.questions.id)
-                    ;
-
-                    addEditAnswersDeleteButtons(newElementLi, d.questions)
-                    $("#list_questions").prepend(newElementLi);
+                    getListQuestions(urlParams);
 
                 } else {
                     alertShow('error', d['message']);
@@ -177,7 +190,13 @@
         });
     })
 
-    function addEditAnswersDeleteButtons(ElementLi, question) {
+    function showQuestionItem(question) {
+        let newElementLi = $('<li>')
+            .text(question.title)
+            .addClass('list-group-item d-flex justify-content-between align-items-center js-question-item')
+            .attr("data-id", question.id)
+        ;
+
         let newSpan = $('<span>');
 
         let newButtonEdit = $('<a>').addClass('btn btn-primary shadow btn-xs sharp me-1');
@@ -192,10 +211,10 @@
         newButtonDelete.append($('<i>').addClass('fa fa-trash'));
         newSpan.append(newButtonDelete);
 
-        ElementLi.append(newSpan);
+        newElementLi.append(newSpan);
 
         $(newButtonEdit).on("click", function () {
-            showEditInput(ElementLi, question)
+            showEditInput(question)
         });
 
         $(newButtonAnswers).on("click", function () {
@@ -203,21 +222,10 @@
         });
 
         $(newButtonDelete).on("click", function () {
-            deleteQuestion(ElementLi, question)
+            deleteQuestion(newElementLi, question)
         });
 
-    }
-
-    function showQuestionItem(question) {
-        let newElementLi = $('<li>')
-            .text(question.title)
-            .addClass('list-group-item d-flex justify-content-between align-items-center js-question-item')
-            .attr("data-id", question.id)
-        ;
-
-        addEditAnswersDeleteButtons(newElementLi, question);
-
-        $("#list_questions").append(newElementLi);
+        $('#list_questions').append(newElementLi);
     }
 
     function showPagination(pager) {
@@ -227,10 +235,9 @@
         let newElementALeft = $('<a>').addClass('page-link')
         if (pager.prev_page) {
             $(newElementLiLeft).on("click", function () {
-                getListQuestions({
-                    limit: pager.limit.toString(),
-                    page: pager.prev_page.toString()
-                });
+                urlParams.limit = pager.limit.toString()
+                urlParams.page = pager.prev_page.toString()
+                getListQuestions(urlParams);
             });
             newElementALeft.append($('<i>').addClass('fa-solid fa-angle-left'))
             newElementLiLeft.append(newElementALeft)
@@ -248,10 +255,9 @@
         let newElementARight = $('<a>').addClass('page-link')
         if (pager.next_page) {
             $(newElementLiRight).on("click", function () {
-                getListQuestions({
-                    limit: pager.limit.toString(),
-                    page: pager.next_page.toString()
-                });
+                urlParams.limit = pager.limit.toString()
+                urlParams.page = pager.next_page.toString()
+                getListQuestions(urlParams);
             });
             newElementARight.append($('<i>').addClass('fa-solid fa-angle-right'))
             newElementLiRight.append(newElementARight)
@@ -259,10 +265,15 @@
         $("#list_pagination").append(newElementLiRight);
     }
 
-    function showEditInput(elementLi, question) {
+    function showEditInput(question) {
+        clearAllInfo();
+        $('#add_question').data('id', 'cancel').text('Отмена')
+
         $('#update_new_item').show();
         $('#save_new_item').hide();
-        showButtonAddCancel(question);
+
+        $('#list_items').hide();
+        $('#new_item_column').show();
 
         $('#new_item_column input[name="title"]').val(question.title);
         $('#new_item_column input[name="description"]').val(question.description);
@@ -277,12 +288,14 @@
         }
 
         $('#update_new_item').on('click', function () {
-            updateQuestion(elementLi, question);
+            updateQuestion(question);
         })
 
     }
 
     function getListQuestions(params) {
+        clearAll();
+
         var paramsString = $.param(params);
         var apiUrl = '/api/testings/questions/' + lesson_id.toString() + '/list?';
         if (paramsString) {
@@ -294,8 +307,8 @@
             url: apiUrl,
             success: function (d) {
                 if (d['_success'] === true) {
-                    $('#list_questions li').remove()
-                    $('#list_pagination li').remove()
+                    $('#list_questions').empty()
+                    $('#list_pagination').empty()
 
                     $.each(d['questions'], function (index, question) {
                         showQuestionItem(question);
@@ -311,64 +324,12 @@
         })
     }
 
-
     function clearAllInfo() {
         $('#new_item_column input').val('');
         $('#new_item_column img').attr('src', '');
         $('#new_item_column audio').attr('src', '');
-        $('#update_new_item').hide()
-        $('#save_new_item').hide()
         clearRecorder();
     }
-
-    function showAnswers(question) {
-        $('#select_answers').empty()
-        if (question) {
-            $.ajax({
-                type: 'GET',
-                dataType: 'json',
-                url: '/api/testings/answers/' + question.id.toString() + '/list/',
-                success: function (d) {
-                    console.log(d)
-                    if (d['_success'] === true) {
-                        $('#select_answers').append($('<option>').text('Выберите').attr('selected', 'selected'))
-                        $.each(d['answers'], function (index, answer) {
-                            console.log(answer)
-                            let newElementOption = $('<option>').text(answer.title).val(answer.id);
-                            if (question.current_answer_id === answer.id) {
-                                newElementOption.attr('selected', 'selected')
-                            }
-                            $('#select_answers').append(newElementOption)
-
-                        });
-                    } else {
-                        alertShow('error', d['message'])
-                    }
-                },
-                error: function (d) {
-                    alertShow('waring');
-                }
-            });
-        }
-    }
-
-    function showButtonAddCancel(question) {
-        $('#list_items').toggle();
-        $('#new_item_column').toggle();
-        if ($('#add_question').data('id') === 'add') {
-            $('#add_question').data('id', 'cancel').text('Отмена')
-            showAnswers(question)
-
-        } else {
-            $('#add_question').data('id', 'add').text('Создать')
-            clearAllInfo();
-        }
-    }
-
-    $('#add_question').click(function () {
-        $('#save_new_item').show();
-        showButtonAddCancel(null);
-    });
 
     function deleteQuestion(ElementLi, question) {
         $.ajax({
@@ -378,7 +339,7 @@
             success: function (d) {
                 if (d['_success'] === true) {
                     alertShow('success');
-                    getListQuestions();
+                    getListQuestions(urlParams);
                 } else {
                     alertShow('error', d['message'])
                 }
@@ -389,8 +350,7 @@
         });
     }
 
-
-    function updateQuestion(elementLi, question) {
+    function updateQuestion(question) {
         var new_data = getValues('#new_item_column')
         console.log(new_data)
         $.ajax({
@@ -400,7 +360,8 @@
             data: JSON.stringify(new_data),
             success: function (d) {
                 if (d['_success'] === true) {
-                    alertShow('success', '', true);
+                    alertShow('success');
+                    getListQuestions(urlParams);
 
                 } else {
                     alertShow('error', d['message']);

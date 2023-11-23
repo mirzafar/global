@@ -16,6 +16,16 @@ class TestingsAnswersAPIView(BaseAPIView):
                 'message': 'Required param(s): question_id'
             })
 
+        lesson_id = await db.fetchval(
+            '''
+            SELECT l.id
+            FROM testings.questions q
+            LEFT JOIN public.lessons l ON q.lesson_id = l.id
+            WHERE q.id = $1
+            ''',
+            question_id
+        )
+
         answers = ListUtils.to_list_of_dicts(await db.fetch(
             '''
             SELECT a.*
@@ -28,7 +38,8 @@ class TestingsAnswersAPIView(BaseAPIView):
 
         return response.json({
             '_success': True,
-            'answers': answers
+            'answers': answers,
+            'lesson_id': lesson_id,
         })
 
     async def post(self, request, user, question_id):
@@ -37,6 +48,27 @@ class TestingsAnswersAPIView(BaseAPIView):
             return response.json({
                 '_success': False,
                 'message': 'Required param(s): question_id'
+            })
+
+        access = await db.fetchval(
+            '''
+            SELECT l.testing_state 
+            FROM testings.questions q
+            LEFT JOIN public.lessons l ON q.lesson_id = l.id
+            WHERE q.id = $1
+            ''',
+            question_id
+        )
+        if access is None:
+            return response.json({
+                '_success': False,
+                'message': 'Урок не найден'
+            })
+
+        if access == 1:
+            return response.json({
+                '_success': False,
+                'message': 'Доступ отказан. Урок уже активирован'
             })
 
         title = StrUtils.to_str(request.json.get('title'))
@@ -48,12 +80,13 @@ class TestingsAnswersAPIView(BaseAPIView):
 
         answer = await db.fetchrow(
             '''
-            INSERT INTO testings.answers(title, question_id)
-            VALUES ($1, $2)
+            INSERT INTO testings.answers(title, question_id, is_currect)
+            VALUES ($1, $2, $3)
             RETURNING *
             ''',
             title,
-            question_id
+            question_id,
+            IntUtils.to_int(request.json.get('is_currect')) or 0
         )
 
         if not answer:
@@ -61,6 +94,18 @@ class TestingsAnswersAPIView(BaseAPIView):
                 '_success': False,
                 'message': 'Operation failed'
             })
+
+        if answer['is_currect']:
+            await db.fetchrow(
+                '''
+                UPDATE testings.answers
+                SET is_currect = 0
+                WHERE id <> $1 AND question_id = $2
+                RETURNING *
+                ''',
+                answer['id'],
+                question_id
+            )
 
         return response.json({
             '_success': True,
