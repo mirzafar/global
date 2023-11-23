@@ -54,8 +54,9 @@ class LessonsView(BaseAPIView):
             '''
             SELECT count(*)
             FROM public.lessons l
-            WHERE %s
-            ''' % cond,
+            WHERE l.status >= $1 %s
+            ''' % (' AND ' + cond) if cond else '',
+            0,
             *cond_vars
         ) or 0
 
