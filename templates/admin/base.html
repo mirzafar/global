@@ -211,6 +211,9 @@
                         {% if _user and 'chats' in (_user.permissions or []) %}
                         <li><a href="/api/chats/template/">Чат</a></li>
                         {% endif %}
+                        {% if _user and 'power-bi' in (_user.permissions or []) %}
+                        <li><a href="/api/analytics/template/">Power BI</a></li>
+                        {% endif %}
                     </ul>
                 </li>
             </ul>
