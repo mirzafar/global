@@ -16,11 +16,6 @@
                     <div class="card-body px-0">
                         <div class="table-responsive active-projects user-tbl  dt-filter">
                             <div id="user-tbl_wrapper" class="dataTables_wrapper no-footer">
-                                <div id="user-tbl_filter" class="dataTables_filter"><label> <i
-                                        class="fa-solid fa-magnifying-glass"></i><input type="search" class=""
-                                                                                        placeholder="Search..."
-                                                                                        aria-controls="user-tbl"></label>
-                                </div>
                                 <table class="table table-responsive-md">
                                     <thead>
                                     <tr>
@@ -48,10 +43,10 @@
                                         <td>
                                             <div class="d-flex align-items-center">
                                                 {% if item.status == -2 %}
-                                                <i class="fa fa-circle text-danger me-1"></i> удален
+                                                <i class="fa fa-circle text-danger me-1"></i> Удален
 
                                                 {% elif item.status == -1 %}
-                                                <i class="fa fa-circle text-warning me-1"></i> заблокирован
+                                                <i class="fa fa-circle text-warning me-1"></i> Заблокирован
                                                 {% else %}
                                                 <i class="fa fa-circle text-success me-1"></i> Активный
                                                 {% endif %}

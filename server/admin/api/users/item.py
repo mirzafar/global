@@ -55,6 +55,7 @@ class UsersItemView(BaseAPIView):
         password = StrUtils.to_str(request.json.get('password'))
         reply_password = StrUtils.to_str(request.json.get('reply_password'))
         photo = StrUtils.to_str(request.json.get('photo'))
+        status = IntUtils.to_int(request.json.get('status')) or 0
 
         if not first_name or not last_name:
             return response.json({
@@ -107,8 +108,8 @@ class UsersItemView(BaseAPIView):
         user = await db.fetchrow(
             '''
             INSERT INTO public.users
-            (last_name, first_name, middle_name, role_id, password, username, photo, birthday)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            (last_name, first_name, middle_name, role_id, password, username, photo, birthday, status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING *
             ''',
             last_name,
@@ -119,6 +120,7 @@ class UsersItemView(BaseAPIView):
             username,
             photo,
             datetime.strptime(birthday, '%Y-%m-%d') if birthday else None,
+            status,
         )
 
         if not user:
@@ -157,6 +159,7 @@ class UsersItemView(BaseAPIView):
         password = StrUtils.to_str(request.json.get('password'))
         reply_password = StrUtils.to_str(request.json.get('reply_password'))
         photo = StrUtils.to_str(request.json.get('photo'))
+        status = IntUtils.to_int(request.json.get('status')) or 0
 
         if not first_name or not last_name:
             return response.json({
@@ -207,7 +210,16 @@ class UsersItemView(BaseAPIView):
         user = await db.fetchrow(
             '''
             UPDATE public.users
-            SET last_name = $2, first_name = $3, middle_name = $4, role_id = $5, password = $6, username = $7, photo = $8, birthday = $9
+            SET 
+                last_name = $2,
+                first_name = $3, 
+                middle_name = $4, 
+                role_id = $5, 
+                password = $6, 
+                username = $7, 
+                photo = $8, 
+                birthday = $9,
+                status = $10
             WHERE id = $1
             RETURNING *
             ''',
@@ -220,6 +232,7 @@ class UsersItemView(BaseAPIView):
             username,
             photo,
             datetime.strptime(birthday, '%Y-%m-%d') if birthday else None,
+            status
         )
 
         if not user:
