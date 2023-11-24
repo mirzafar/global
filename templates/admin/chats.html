@@ -72,7 +72,7 @@
     let activeChatUserId = null
     const activeUserId = parseInt($('#currentUser').val())
 
-    const conn = new WebSocket('ws://'+ location.hostname +':8129/ws/chats/');
+    const conn = new WebSocket('ws://'+ location.hostname +'/ws/chats/');
     conn.onopen = function () {
         console.log('open')
         var e = JSON.stringify({
