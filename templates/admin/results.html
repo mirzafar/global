@@ -141,6 +141,10 @@
         let newElementTdEnded = $('<td>').text(ended_at);
         newElementTr.append(newElementTdEnded);
 
+        $(newElementTr).on('click', function (){
+            location.href = '/api/testings/responses/' + item.id.toString() + '/template/'
+        })
+
         $("#list_items").append(newElementTr);
     }
 

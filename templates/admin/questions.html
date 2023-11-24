@@ -113,8 +113,7 @@
 <script>
     let urlParams = {}
     let curl_url = location.pathname.split('/');
-    let lesson_id = curl_url[curl_url.length - 1] || curl_url[curl_url.length - 2];
-
+    let lesson_id = curl_url[curl_url.length - 3];
     function backUrl(url) {
         if (url) {
             location.href = url
@@ -335,7 +334,7 @@
         $.ajax({
             type: 'DELETE',
             dataType: 'json',
-            url: '/api/testings/questions/' + question.id.toString(),
+            url: '/api/testings/questions/' + question.id.toString() + '/template/',
             success: function (d) {
                 if (d['_success'] === true) {
                     alertShow('success');
@@ -356,7 +355,7 @@
         $.ajax({
             type: 'POST',
             dataType: 'json',
-            url: '/api/testings/questions/' + question.id.toString(),
+            url: '/api/testings/questions/' + question.id.toString() + '/template/',
             data: JSON.stringify(new_data),
             success: function (d) {
                 if (d['_success'] === true) {

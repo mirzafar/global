@@ -1,12 +1,47 @@
 from sanic import response
 
 from core.db import db
+from core.encoder import encoder
 from core.handlers import BaseAPIView
 from utils.ints import IntUtils
 from utils.strs import StrUtils
 
 
 class TestingsQuestionsItemAPIView(BaseAPIView):
+    async def get(self, request, user, question_id):
+        question_id = IntUtils.to_int(question_id)
+        if not question_id:
+            return response.json({
+                '_success': False,
+                'message': 'Required param(s): question_id'
+            })
+
+        question = await db.fetchrow(
+            '''
+            SELECT
+                q.*,
+                (
+                    SELECT array_agg(
+                        json_build_object(
+                            'id', a.id,
+                            'title', a.title,
+                            'is_currect', a.is_currect
+                        )
+                    )
+                    FROM testings.answers a
+                    WHERE a.question_id = q.id
+                ) AS answers
+            FROM testings.questions q
+            WHERE q.id = $1
+            ''',
+            question_id
+        )
+
+        return response.json({
+            '_success': True,
+            'question': dict(question)
+        }, dumps=encoder.encode)
+
     async def post(self, request, user, question_id):
         question_id = IntUtils.to_int(question_id)
         if not question_id:
@@ -74,7 +109,7 @@ class TestingsQuestionsItemAPIView(BaseAPIView):
         return response.json({
             '_success': True,
             'question': dict(question)
-        })
+        }, dumps=encoder.encode)
 
     async def delete(self, request, user, question_id):
         question_id = IntUtils.to_int(question_id)
@@ -103,4 +138,4 @@ class TestingsQuestionsItemAPIView(BaseAPIView):
         return response.json({
             '_success': True,
             'question': dict(question)
-        })
+        }, dumps=encoder.encode)

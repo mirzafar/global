@@ -214,13 +214,11 @@ class TestingsCompleteAPIView(BaseAPIView):
 
             flag = await db.fetchval(
                 '''
-                SELECT (CASE WHEN q.current_answer_id = a.id THEN TRUE ELSE FALSE END)
+                SELECT (CASE WHEN a.is_currect = 1 THEN TRUE ELSE FALSE END)
                 FROM testings.answers a
-                LEFT JOIN testings.questions q ON a.question_id = q.id
-                WHERE a.id = $1 AND q.id = $2
+                WHERE a.id = $1
                 ''',
-                answer_id,
-                question_id,
+                answer_id
             )
 
             if flag is None:

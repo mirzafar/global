@@ -49,7 +49,7 @@
 
     function backUrl() {
         if (lesson_id) {
-            location.href = '/api/testings/questions/' + lesson_id.toString()
+            location.href = '/api/testings/questions/' + lesson_id.toString() + '/template/'
         } else {
             window.history.back();
         }
