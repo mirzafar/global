@@ -183,7 +183,7 @@ class LessonsItemView(BaseAPIView):
                 WHERE lesson_id = $1 AND status >= 0
                 ''',
                 lesson_id
-            )
+            ) or []
 
             if question_ids:
                 answers = await db.fetchrow(
@@ -203,7 +203,7 @@ class LessonsItemView(BaseAPIView):
                         'message': 'Ответы на вопросы не найден'
                     })
 
-                if not len(answers['count_answers'] or 0) == len(question_ids):
+                if not len(answers['count_answers'] or []) == len(question_ids):
                     return response.json({
                         '_success': False,
                         'message': 'У вопроса отсутствует правильный ответ'
