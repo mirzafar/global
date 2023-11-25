@@ -59,6 +59,10 @@
 <script src="/static/js/apexchart.js"></script>
 <script src="/static/js/Chart.bundle.min.js"></script>
 <script>
+    $('.container-fluid').css({
+        'padding': '0 1.875rem'
+    })
+
     let paramUser = {}
 
     getChats(paramUser);
@@ -72,7 +76,12 @@
     let activeChatUserId = null
     const activeUserId = parseInt($('#currentUser').val())
 
-    const conn = new WebSocket('ws://'+ location.hostname +'/ws/chats/');
+    let socketUrl = 'ws://' + location.hostname + ':8129/ws/chats/'
+    if (location.hostname === 'edu.tests.kz') {
+        socketUrl = 'ws://' + location.hostname + '/ws/chats/'
+    }
+
+    const conn = new WebSocket(socketUrl);
     conn.onopen = function () {
         console.log('open')
         var e = JSON.stringify({
@@ -356,6 +365,7 @@
         let elementMainDiv = $('<div>').addClass('input-group')
 
         let elementArea = $('<textarea>').attr({
+            rows: 1,
             class: 'form-control',
         })
         elementMainDiv.append(elementArea)
