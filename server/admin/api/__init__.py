@@ -3,11 +3,14 @@ from sanic import Blueprint
 from admin.api.analytics import power_bi_bp
 from admin.api.categories import category_bp
 from admin.api.chats import chats_bp
+from admin.api.companies import companies_bp
+from admin.api.customers import customers_bp
 from admin.api.lessons import lessons_bp
 from admin.api.main import MainView
 from admin.api.roles import role_bp
 from admin.api.testings import testing_bp
 from admin.api.users import users_bp
+from admin.api.visits import visits_bp
 
 main_bp = Blueprint('main', url_prefix='/')
 
@@ -22,5 +25,8 @@ api_group = Blueprint.group(
     testing_bp,
     chats_bp,
     power_bi_bp,
+    companies_bp,
+    visits_bp,
+    customers_bp,
     url_prefix='/api'
 )

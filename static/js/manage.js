@@ -61,3 +61,17 @@ function getValues(sContainer) {
     });
     return oData;
 }
+
+function getValuesByElement(element) {
+    oData = {};
+    $(element).find('input').each(function (a, b) {
+        oData[$(b).attr('name')] = $(b).val();
+    })
+    $(element).find('textarea').each(function (a, b) {
+        oData[$(b).attr('name')] = $(b).val();
+    })
+    $(element).find('select').each(function (a, b) {
+        oData[$(b).attr('name')] = $(b).val();
+    });
+    return oData;
+}

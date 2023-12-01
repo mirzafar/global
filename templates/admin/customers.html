@@ -1,0 +1,272 @@
+{% extends 'admin/base.html' %}
+{% block namePage %}
+Список клиентов
+{% endblock %}
+{% block container %}
+<div class="row">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center" onclick="newColumn()">
+            <button class="badge light badge-outline-primary">+ Создать</button>
+        </div>
+    </div>
+    <div class="col-xl-12 active-p">
+        <div class="tab-content" id="pills-tabContent">
+            <div class="tab-pane fade show active" id="pills-colm" role="tabpanel" aria-labelledby="pills-colm-tab">
+                <div class="card">
+                    <div class="card-body px-0">
+                        <div class="table-responsive active-projects user-tbl  dt-filter">
+                            <div id="user-tbl_wrapper" class="dataTables_wrapper no-footer">
+                                <div id="user-tbl_filter" class="dataTables_filter">
+                                    <label> <i class="fa-solid fa-magnifying-glass" id="searchButton"></i>
+                                        <input type="search"
+                                               placeholder="Поиск..."
+                                               id="searchInput"
+                                               aria-controls="user-tbl"></label>
+                                    <label><select id="activeSelect">
+                                        <option value="0">Активные</option>
+                                        <option value="-2">Заблокированные</option>
+                                        <option value="-1">Удаленные</option>
+                                    </select></label>
+                                </div>
+                                <table class="table base-table">
+                                    <thead>
+                                    <tr>
+                                        <th><strong># ID</strong></th>
+                                        <th><strong>Фото</strong></th>
+                                        <th><strong>ФИО</strong></th>
+                                        <th><strong>Номер телефон</strong></th>
+                                        <th><strong>Статус</strong></th>
+                                        <th><strong></strong></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="list_items">
+
+                                    </tbody>
+                                </table>
+                                <div class="row ">
+                                    <div class="col-12 ps-3">
+                                        <div class="table-pagenation">
+                                            <nav>
+                                                <ul class="pagination pagination-sm" id="list_pagination">
+
+                                                </ul>
+                                            </nav>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    function newColumn() {
+        location.href = '/api/customers/new/create/'
+    }
+    let urlParams = {}
+
+    getListItems(urlParams);
+
+    function clearTable() {
+        $('#list_items').empty()
+        $('#list_pagination').empty()
+    }
+
+    function getListItems(params) {
+        let paramsString = $.param(params);
+        let apiUrl = '/api/customers/list/?';
+        if (paramsString) {
+            apiUrl += paramsString
+        }
+
+        console.log(apiUrl)
+
+        $.ajax({
+            type: 'GET',
+            dataType: 'json',
+            url: apiUrl,
+            success: function (d) {
+                if (d['_success'] === true) {
+                    clearTable();
+                    console.log(d)
+                    // showButtonAdd(d['user']);
+
+                    $.each(d['data'], function (index, item) {
+                        showDataItem(item);
+                    });
+
+                    showPagination(d['pager']);
+
+                } else {
+                    alertShow('error', d['message']);
+                }
+            },
+            error: function (d) {
+                alertShow('waring');
+            }
+        })
+    }
+
+    function deleteButtonFunc(item) {
+        $.ajax({
+            type: 'DELETE',
+            dataType: 'json',
+            url: '/api/customers/' + item.id.toString() + '/item/',
+            success: function (d) {
+                if (d['_success'] === true) {
+                    getListItems(urlParams)
+                } else {
+                    alertShow('error', d['message']);
+                }
+            },
+            error: function (d) {
+                alertShow('waring');
+            }
+        })
+    }
+
+    function showDataItem(item) {
+        let newColumn = $('<tr>');
+
+        let columnId = $('<td>').text(item.id);
+        newColumn.append(columnId);
+
+        let srcPhot = '/static/images/noauthor.png'
+        if (item.photo) {
+            srcPhot = '/static/uploads/' + item.photo
+        }
+
+        let columnPhoto = $('<td>').append(
+            $('<div>').addClass('avatar-list avatar-list-stacked').append(
+                $('<img>').attr({
+                    class: 'avatar avatar-md rounded-circle',
+                    src: srcPhot
+                })
+            )
+        );
+        newColumn.append(columnPhoto);
+
+        let fi = ''
+        if (item.last_name) {
+            fi += item.last_name
+            fi += ' '
+        }
+        if (item.first_name) {
+            fi += item.first_name
+            fi += ' '
+        }
+
+        let columnFI = $('<td>').text(fi);
+        newColumn.append(columnFI);
+
+        let columnPhone = $('<td>').text(item.phone_number);
+        newColumn.append(columnPhone);
+
+        let statusTitle = ''
+        let statusCss = ''
+
+        switch (item.status) {
+            case 0:
+                statusTitle = 'Активный';
+                statusCss = 'badge light badge-success';
+                break;
+            case -2:
+                statusTitle = 'Заблакитрован';
+                statusCss = 'badge light badge-warning';
+                break;
+            case -1:
+                statusTitle = 'Удален'
+                statusCss = 'badge light badge-danger'
+                break;
+        }
+
+        let columnStatus = $('<td>').append(
+            $('<span>').addClass(statusCss).text(statusTitle)
+        );
+        newColumn.append(columnStatus);
+
+        let columnActions = $('<td>')
+        let actionInfo = $('<a>').addClass('btn btn-info shadow btn-xs sharp me-1').append(
+            $('<i>').addClass('fa fa-info')
+        )
+        columnActions.append(actionInfo)
+
+        let actionDelete = $('<a>').addClass('btn btn-danger shadow btn-xs sharp me-1').append(
+            $('<i>').addClass('fa fa-trash')
+        )
+        if (item.status !== -1) {
+
+            columnActions.append(actionDelete)
+        }
+        newColumn.append(columnActions)
+
+        $(actionInfo).on('click', function () {
+            location.href = '/api/customers/' + item.id.toString() + '/template/'
+        })
+
+        $(actionDelete).on('click', function () {
+            deleteButtonFunc(item)
+        })
+
+        $('#list_items').append(newColumn);
+    }
+
+    function showPagination(pager) {
+
+        // ADD LEFT BUTTON PAGINATION
+        let newElementLiLeft = $('<li>').addClass('page-item page-indicator');
+        let newElementALeft = $('<a>').addClass('page-link')
+        if (pager.prev_page) {
+            $(newElementLiLeft).on("click", function () {
+                urlParams.limit = pager.limit.toString()
+                urlParams.page = pager.prev_page.toString()
+                getListItems(urlParams);
+            });
+            newElementALeft.append($('<i>').addClass('fa-solid fa-angle-left'))
+            newElementLiLeft.append(newElementALeft)
+        }
+
+        $("#list_pagination").append(newElementLiLeft);
+
+        // ADD CURRENT
+        let newElementLiCurrent = $('<li>').addClass('page-item');
+        newElementLiCurrent.append($('<a>').addClass('page-link').text(pager.page))
+        $("#list_pagination").append(newElementLiCurrent);
+
+        // ADD RIGHT BUTTON PAGINATION
+        let newElementLiRight = $('<li>').addClass('page-item page-indicator');
+        let newElementARight = $('<a>').addClass('page-link')
+        if (pager.next_page) {
+            $(newElementLiRight).on("click", function () {
+                urlParams.limit = pager.limit.toString()
+                urlParams.page = pager.next_page.toString()
+                getListItems(urlParams);
+            });
+            newElementARight.append($('<i>').addClass('fa-solid fa-angle-right'));
+            newElementLiRight.append(newElementARight);
+        }
+        $("#list_pagination").append(newElementLiRight);
+    }
+
+    $('#searchInput').on('change', function () {
+        console.log(urlParams)
+        urlParams.query = $('#searchInput').val();
+        getListItems(urlParams);
+    })
+
+    $('#activeSelect').on('change', function () {
+        console.log(urlParams)
+        urlParams.status = $('#activeSelect').val();
+        getListItems(urlParams);
+    })
+
+</script>
+{% endblock %}

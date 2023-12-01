@@ -21,6 +21,10 @@
     <link href="/static/css/sweetalert2.min.css" rel="stylesheet">
 
     <style>
+        .base-table th, .base-table td {
+            max-width: 10%;
+        }
+
         .main-alert {
             z-index: 100;
             position: fixed;
@@ -192,27 +196,12 @@
                     <span class="nav-text">Панель управления</span>
                 </a>
                     <ul aria-expanded="false">
-                        {% if _user and 'roles' in (_user.permissions or []) %}
                         <li><a href="/api/roles/">Роль</a></li>
-                        {% endif %}
-                        {% if _user and 'categories' in (_user.permissions or []) %}
+                        <li><a href="/api/companies/template/">Компания</a></li>
                         <li><a href="/api/categories/">Категории</a></li>
-                        {% endif %}
-                        {% if _user and 'lessons' in (_user.permissions or []) %}
-                        <li><a href="/api/lessons/template/">Уроки</a></li>
-                        {% endif %}
-                        {% if _user and 'users' in (_user.permissions or []) %}
                         <li><a href="/api/users/">Пользователи</a></li>
-                        {% endif %}
-                        {% if _user and 'my_lessons' in (_user.permissions or []) %}
-                        <li><a href="/api/lessons/me/template/">Мои уроки</a></li>
-                        {% endif %}
-                        {% if _user and 'chats' in (_user.permissions or []) %}
-                        <li><a href="/api/chats/template/">Чат</a></li>
-                        {% endif %}
-                        {% if _user and 'power-bi' in (_user.permissions or []) %}
-                        <li><a href="/api/analytics/template/">Power BI</a></li>
-                        {% endif %}
+                        <li><a href="/api/customers/template/">Клиенты</a></li>
+                        <li><a href="/api/visits/template/">Записи на приём</a></li>
                     </ul>
                 </li>
             </ul>

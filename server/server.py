@@ -32,7 +32,8 @@ Session(
     app=app,
     interface=AIORedisSessionInterface(
         redis=cache,
-        domain=settings['base_url']
+        domain=settings['base_url'],
+        expiry=60
     )
 )
 
