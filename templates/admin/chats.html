@@ -76,9 +76,9 @@
     let activeChatUserId = null
     const activeUserId = parseInt($('#currentUser').val())
 
-    let socketUrl = 'ws://' + location.hostname + ':8129/ws/chats/'
+    let socketUrl = 'wss://' + location.hostname + ':8129/ws/chats/'
     if (location.hostname === 'miras.tests.kz') {
-        socketUrl = 'ws://' + location.hostname + '/ws/chats/'
+        socketUrl = 'wss://' + location.hostname + '/ws/chats/'
     }
 
     const conn = new WebSocket(socketUrl);
