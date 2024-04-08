@@ -1,6 +1,7 @@
 {% extends 'admin/base.html' %}
 {% block namePage %}
-<button type="button" onclick="backUrl('/api/lessons/template/')" class="btn btn-page"><span class="btn-icon-start text-info"><i
+<button type="button" onclick="backUrl('/api/lessons/template/')" class="btn btn-page"><span
+        class="btn-icon-start text-info"><i
         class="fa fa-left-long color-info"></i></span>Назад
 </button>Вопросы
 {% endblock %}
@@ -114,6 +115,7 @@
     let urlParams = {}
     let curl_url = location.pathname.split('/');
     let lesson_id = curl_url[curl_url.length - 3];
+
     function backUrl(url) {
         if (url) {
             location.href = url
@@ -121,6 +123,16 @@
             window.history.back();
         }
     }
+
+    if ($('.main-kanban-column-title-text-inner').val() === 'Завершение') {
+        $('.crm-kanban-item').click();
+    }
+    $('.main-kanban-column').each(function () {
+        let button = $(this).parent().find('.crm-kanban-item');
+        if (button.val() === 'Завершение') {
+            $(this).click();
+        }
+    });
 
     function clearAll() {
         $('#add_question').data('id', 'add').text('Создать')
